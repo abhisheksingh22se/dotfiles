@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+export PATH="/opt/homebrew/bin:$PATH"
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+
+##### Bar Appearance (Transparent Base) #####
+sketchybar --bar \
+  height=32 \
+  color=0x00000000 \
+  blur_radius=30 \
+  position=top \
+  sticky=on \
+  padding_left=0 \
+  padding_right=0 \
+  margin=5 \
+  y_offset=8 \
+  border_width=0
+
+##### Changing Defaults (Floating Text, No Individual Pills) #####
+default=(
+  icon.font="Hack Nerd Font:Bold:14.0"
+  label.font="SF Pro:Semibold:13.0"
+  icon.color=0x99ffffff
+  label.color=0x99ffffff
+  padding_left=4
+  padding_right=4
+  background.color=0x00000000  # No individual background pills
+  icon.padding_left=6
+  icon.padding_right=2
+  label.padding_left=2
+  label.padding_right=6
+)
+sketchybar --default "${default[@]}"
+
+##### AeroSpace Workspace Indicators (Rust Plugin) #####
+sketchybar --add event aerospace_workspace_change
+sketchybar --add event aerospace_focus_change
+sketchybar --add item aerospace left \
+           --subscribe aerospace aerospace_workspace_change \
+           --subscribe aerospace aerospace_focus_change \
+           --set aerospace \
+           label="󱂬" \
+           click_script="aerospace layout tiles accordion" \
+           script="$CONFIG_DIR/plugins/aerospace_plugin"
+
+##### Adding Left Items #####
+sketchybar --add item chevron left \
+           --set chevron icon= label.drawing=off \
+           --add item front_app left \
+           --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" click_script="aerospace layout floating tiling" \
+           --subscribe front_app front_app_switched
+
+##### Adding Right Items (Volume Removed) #####
+sketchybar --add item clock right \
+           --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
+           --add item battery right \
+           --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+           --subscribe battery system_woke power_source_change
+
+##### Separated Media Items (Clean UI) #####
+# Title item
+sketchybar --add item media.title right \
+           --set media.title \
+                 background.color=0x00000000 \
+                 icon.drawing=off \
+                 label.font="SF Pro:Semibold:13.0" \
+                 label.color=0x99ffffff \
+                 label.padding_left=4 \
+                 label.padding_right=10 \
+                 drawing=off
+
+# Cover Art item
+sketchybar --add item media.cover right \
+           --set media.cover \
+                 background.color=0x01000000 \
+                 background.image.scale=0.032 \
+                 background.corner_radius=4 \
+                 background.height=20 \
+                 icon.drawing=off \
+                 label.drawing=off \
+                 padding_left=8 \
+                 padding_right=0 \
+                 drawing=off
+
+# Wrap them both in a single glass bracket to match your layout
+sketchybar --add bracket media_capsule media.title media.cover \
+           --set media_capsule \
+                 background.color=0x25000000 \
+                 background.corner_radius=10 \
+                 background.border_width=1 \
+                 background.border_color=0x20ffffff \
+                 background.height=26
+
+##### Single Glass Capsule Brackets for Left and Right Sides #####
+sketchybar --add bracket left_capsule aerospace chevron front_app \
+           --set left_capsule background.color=0x25000000 \
+                              background.corner_radius=10 \
+                              background.border_width=1 \
+                              background.border_color=0x20ffffff \
+                              background.height=26
+
+sketchybar --add bracket right_capsule clock battery \
+           --set right_capsule background.color=0x25000000 \
+                               background.corner_radius=10 \
+                               background.border_width=1 \
+                               background.border_color=0x20ffffff \
+                               background.height=26
+
+##### Force all scripts to run the first time #####
+sketchybar --update
+
+##### Autostart Python Daemon #####
+# Kill any existing daemon so they don't multiply when reloading the bar
+pkill -f media_daemon.py
+# Start the daemon silently in the background
+~/.Dotfiles/sketchybar/plugins/wnp-daemon/venv/bin/python ~/.Dotfiles/sketchybar/plugins/wnp-daemon/media_daemon.py > /dev/null 2>&1 &
