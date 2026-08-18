@@ -1,0 +1,20 @@
+# Version control and system metadata
+\.git/
+\.gitignore
+\.gitmodules
+\.DS_Store
+Thumbs\.db
+
+# Documentation and licensing
+README.*
+LICENSE.*
+.*\.md
+
+# Shell scripts and install helpers (not part of config symlinks)
+.*\.sh
+
+# Stow ignore files themselves
+\.stow-local-ignore
+\.stowrc
+
+.*\.code-workspace
