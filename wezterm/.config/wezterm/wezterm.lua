@@ -5,6 +5,12 @@ if wezterm.config_builder then
   config = wezterm.config_builder()
 end
 
+if wezterm.target_triple == 'x86_64-pc-windows-msvc' then
+  config.default_prog = { 'bash.exe' } -- Or { 'bash.exe' } if you prefer Git Bash
+else
+  config.default_prog = { 'zsh' }
+end
+
 
 -- ─────────────────────────────────────────────
 -- Font
