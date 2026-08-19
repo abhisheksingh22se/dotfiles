@@ -3,3 +3,6 @@
 *.swp
 *.tmp
 *.code-workspace
+
+# Rust build output for the sketchybar aerospace plugin
+target/

@@ -14,7 +14,7 @@ after-startup-command = [
 start-at-login = true
 
 # Trigger SketchyBar events for the Rust plugin
-exec-on-workspace-change = ['/bin/bash', '-c', '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED=$AEROSPACE_FOCUSED_WORKSPACE']
+exec-on-workspace-change = ['/bin/bash', '-c', '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED=$AEROSPACE_FOCUSED_WORKSPACE PREV_FOCUSED=$AEROSPACE_PREV_WORKSPACE']
 on-focus-changed = ['exec-and-forget /opt/homebrew/bin/sketchybar --trigger aerospace_focus_change']
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
