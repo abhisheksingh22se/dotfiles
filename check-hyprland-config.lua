@@ -25,14 +25,63 @@ local execs, submaps = 0, {}
 local scope = "main"        -- flips while a submap body is being defined
 local problems = {}
 
+-- Config keys Hyprland has removed or relocated. A dead key is not fatal — Hyprland
+-- logs "unknown config key" and carries on — but it means the setting you wrote is
+-- silently doing nothing, which is worse than an error you'd notice. Add to this list
+-- whenever an upstream release drops one.
+local DEAD_KEYS = {
+  ["misc.vfr"] =
+    "moved to debug:vfr in 0.55, and marked debug-only. Defaults to on — just drop it.",
+  ["misc.new_window_takes_over_fullscreen"] =
+    "replaced in 0.53 by misc:on_focus_under_fullscreen (not a like-for-like swap).",
+  ["master.inherit_fullscreen"] =
+    "replaced in 0.53 by misc:on_focus_under_fullscreen.",
+  ["dwindle.pseudotile"] =
+    "removed in 0.55 (it wasn't doing anything).",
+  ["decoration.shadow.ignore_window"] =
+    "removed in 0.55; the behaviour is now always on.",
+  ["render.cm_fs_passthrough"] =
+    "removed in 0.55; automatic with render:cm_auto_hdr.",
+  ["dwindle.no_gaps_when_only"] =
+    "removed; use workspace rules (w[tv1] / f[1]) instead.",
+  ["master.no_gaps_when_only"] =
+    "removed; use workspace rules (w[tv1] / f[1]) instead.",
+  ["general.cursor_inactive_timeout"] = "moved to cursor:inactive_timeout.",
+  ["general.hide_cursor_on_key_press"] = "moved to cursor:hide_on_key_press.",
+  ["general.no_cursor_warps"] = "moved to cursor:no_warps.",
+}
+
+-- Keys typed as css_gap: Hyprland's Lua layer takes an integer or a
+-- {top=,right=,bottom=,left=} table, and rejects the conf file's "10 5 5 5" string.
+local GAP_KEYS = {
+  ["general.gaps_in"] = true, ["general.gaps_out"] = true, ["general.gaps_workspaces"] = true,
+}
+
 local handle = { set_enabled = function() end }
 local function noop() return handle end
 local function dispatcher(name)
   return function(a) return { __dispatcher = name, __args = a } end
 end
 
+-- Walk everything passed to hl.config() and flag keys that no longer exist, plus the
+-- string-vs-table mistake that css_gap values invite.
+local function checkConfig(tbl, prefix)
+  for k, v in pairs(tbl) do
+    local path = (prefix == "" and tostring(k)) or (prefix .. "." .. tostring(k))
+    if DEAD_KEYS[path] then
+      problems[#problems + 1] = ("dead config key `%s` — %s"):format(path, DEAD_KEYS[path])
+    end
+    if GAP_KEYS[path] and type(v) == "string" then
+      problems[#problems + 1] =
+        ("`%s` is a string; css_gap wants an integer or {top=,right=,bottom=,left=}"):format(path)
+    end
+    if type(v) == "table" then checkConfig(v, path) end
+  end
+end
+
 hl = {
-  monitor = noop, env = noop, config = noop, curve = noop, animation = noop,
+  monitor = noop, env = noop, curve = noop, animation = noop,
+  config = function(t) checkConfig(t, "") return handle end,
   gesture = noop, device = noop, permission = noop, load_plugin = noop,
   exec_cmd = function() execs = execs + 1 return handle end,
   print = function(...) print("  hl.print:", ...) end,

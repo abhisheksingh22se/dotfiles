@@ -84,7 +84,13 @@ takes that role: `SUPER+return` terminal, `SUPER+space` launcher, `SUPER+V` clip
 
 Run `luajit check-hyprland-config.lua --list` to print the full bind map. That script executes
 `hyprland.lua` against a stubbed `hl` API, so a typo or a duplicate bind is caught before it
-becomes a black screen with no working keys on the actual machine.
+becomes a black screen with no working keys on the actual machine. It also flags config keys
+Hyprland has removed or relocated — a dead key isn't fatal, Hyprland logs "unknown config key"
+and carries on, which means the setting you wrote is silently doing nothing. `DEAD_KEYS` at the
+top of the script is the list; add to it whenever an upstream release drops one.
+
+On the machine itself, `hyprctl configerrors` is the authority — the checker can prove the file
+is structurally sound but not that this build accepts every option name.
 
 ## Bootstrapping a new machine
 

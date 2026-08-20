@@ -196,8 +196,11 @@ hl.config({
     general = {
         -- aerospace.toml: inner 5 / outer 5, with top 10. Waybar reserves its own
         -- strip via exclusive zone, so the extra top gap is just breathing room.
+        --
+        -- The conf-file form ("10 5 5 5") is not accepted here: the Lua layer types
+        -- this as a css_gap, which wants either a plain integer or this table.
         gaps_in  = 5,
-        gaps_out = "10 5 5 5",
+        gaps_out = { top = 10, right = 5, bottom = 5, left = 5 },
 
         -- `borders` on macOS drew 4px outside the window; Hyprland draws inside, so
         -- 3px reads at about the same weight.
@@ -279,9 +282,19 @@ hl.config({
         force_default_wallpaper  = 0,     -- no anime mascot; hyprpaper owns the background
         disable_hyprland_logo    = true,
         disable_splash_rendering = true,
-        vfr                      = true,  -- big battery win on a laptop
         focus_on_activate        = true,
-        new_window_takes_over_fullscreen = 2,
+
+        -- Two keys deliberately absent, both removed out from under this config:
+        --
+        --   vfr  — moved to `debug:` in 0.55 and explicitly marked as a debug variable
+        --          not to be set in production. It defaults to on, so the laptop still
+        --          gets the battery saving; there is simply nothing to declare.
+        --
+        --   new_window_takes_over_fullscreen — replaced in 0.53 by
+        --          `misc:on_focus_under_fullscreen`, which is not a like-for-like
+        --          swap (upstream discussion #12877: the old behaviour isn't
+        --          reachable any more). Left unset rather than guessing at a value
+        --          that would change focus behaviour in a way I can't predict.
     },
 
     cursor = {
