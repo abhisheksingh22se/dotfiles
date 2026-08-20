@@ -25,6 +25,9 @@
   // Making the surface a full 40px tall means the reserved zone always equals the
   // visual footprint. The 8px of empty space at the top is produced in style.css
   // instead, by the capsules' top margin, where it costs nothing.
+  // Verify with `hyprctl layers | grep waybar` — the surface should measure 40 tall.
+  // `height` is a minimum, not a cap: if a font in style.css's stack is missing and
+  // GTK substitutes one with taller metrics, the bar grows past it and eats screen.
   "height": 40,
   "margin-left": 5,
   "margin-right": 5,

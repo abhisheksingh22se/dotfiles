@@ -25,8 +25,19 @@
 @define-color warn        #e6d267;
 @define-color crit        #ff6978;
 
+/* Font stack order matters for the bar's *height*, not just its looks. Nerd Fonts
+   carry very tall vertical metrics — they have to, to fit glyphs like  and 󰂄 — so a
+   GTK label rendered in one is far taller than its font-size suggests, and the bar
+   grows to contain it. "Hack Nerd Font" is deliberately NOT in this text stack for
+   that reason; the icon-only rules further down opt into it explicitly, where the
+   height is already accounted for.
+
+   Noto Sans and DejaVu Sans are the fallbacks because they have normal metrics and
+   one of them is on any Arch install. If the bar measures taller than 40px in
+   `hyprctl layers`, a font in this chain is missing and something with worse metrics
+   is being substituted — check with `fc-list | grep -i inter`. */
 * {
-  font-family: "Inter", "SF Pro Display", "Hack Nerd Font", sans-serif;
+  font-family: "Inter", "SF Pro Display", "Noto Sans", "DejaVu Sans", sans-serif;
   font-size: 13px;
   font-weight: 600;
   border: none;
@@ -140,7 +151,7 @@ window#waybar.hidden { opacity: 0; }
 /* ── Chevron + focused app ────────────────────────────────────────────────────── */
 #custom-chevron {
   font-family: "Hack Nerd Font", monospace;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   color: @text;
   padding: 0px 2px 0px 8px;   /* sketchybar: icon.padding_left=6, padding_left=4 */
@@ -162,7 +173,7 @@ window#waybar.hidden { opacity: 0; }
 }
 
 #custom-gpu {
-  font-family: "Inter", sans-serif;
+  font-family: "Inter", "Noto Sans", "DejaVu Sans", sans-serif;
   font-size: 11px;
   color: @muted;
   padding: 0px 8px 0px 10px;
