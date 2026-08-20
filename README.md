@@ -97,8 +97,20 @@ Installs `stow` if missing, installs packages (`brew bundle` from `Brewfile` on 
 `pacman`/`yay` from `Archfile` on Arch), then stows every package that applies to the detected
 OS. Safe to re-run any time.
 
-On Arch, add the `[g14]` repo *before* the first run — `asusctl` and `supergfxctl` are listed
-in the `Archfile` and only resolve from there. See `upc-plans/linux-setup.md` §8.
+```
+./bootstrap.sh --no-packages     # skip the package pass, just re-link the configs
+```
+
+**A package that won't install never stops the run.** That matters more than it sounds: the
+stow step is what actually makes a machine usable, and the first version of this script lost it
+to a single `target not found` because `set -e` took the whole thing down mid-`pacman`. Now:
+
+- Anything in the `Archfile` as `pac` that isn't in a configured repo is **automatically routed
+  to the AUR** rather than failing. This is what happens to `asusctl` / `supergfxctl` when the
+  asus-linux `[g14]` repo isn't set up or is down — you no longer need that repo at all.
+- Installs run as one batch for speed, then **retry package-by-package** if the batch fails, so
+  one broken build doesn't take the other hundred with it.
+- Failures are collected and printed as a list at the end, after everything else has completed.
 
 **Windows:**
 ```
