@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-export PATH="/opt/homebrew/bin:$PATH"
+if [[ -d /opt/homebrew/bin ]]; then
+  export PATH="/opt/homebrew/bin:$PATH"
+else
+  export PATH="/usr/local/bin:$PATH"
+fi
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 
@@ -114,4 +118,4 @@ sketchybar --update
 # Kill any existing daemon so they don't multiply when reloading the bar
 pkill -f media_daemon.py
 # Start the daemon silently in the background
-~/.Dotfiles/sketchybar/plugins/wnp-daemon/venv/bin/python ~/.Dotfiles/sketchybar/plugins/wnp-daemon/media_daemon.py > /dev/null 2>&1 &
+"$PLUGIN_DIR/wnp-daemon/venv/bin/python" "$PLUGIN_DIR/wnp-daemon/media_daemon.py" > /dev/null 2>&1 &

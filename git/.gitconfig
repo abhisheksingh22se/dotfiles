@@ -1,0 +1,7 @@
+[core]
+	excludesfile = /Users/abhishek/.gitignore_global
+[user]
+	name = Abhishek Singh
+	email = abhisheksingh22se@gmail.com
+[include]
+	path = ~/.gitconfig.local

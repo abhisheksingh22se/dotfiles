@@ -5,8 +5,21 @@ if wezterm.config_builder then
   config = wezterm.config_builder()
 end
 
-if wezterm.target_triple == 'x86_64-pc-windows-msvc' then
-  config.default_prog = { 'bash.exe' } 
+local target = wezterm.target_triple
+local is_windows = target:find('windows') ~= nil
+local is_macos = target:find('apple') ~= nil
+local is_linux = target:find('linux') ~= nil
+
+-- CMD maps to Super/Win on non-macOS, which isn't the muscle memory a Windows/Linux
+-- user expects — use CTRL there instead. One variable, reused by every binding below.
+local super = is_macos and 'CMD' or 'CTRL'
+
+if is_windows then
+  config.default_prog = { 'bash.exe' }
+end
+
+if is_linux then
+  config.default_prog = { '/bin/bash' }
 end
 
 -- ─────────────────────────────────────────────
@@ -58,7 +71,9 @@ config.colors = {
 -- ─────────────────────────────────────────────
 
 config.window_background_opacity = 0.80
-config.macos_window_background_blur = 38
+if is_macos then
+  config.macos_window_background_blur = 38
+end
 config.text_background_opacity = 0.90
 
 config.window_decorations = 'RESIZE'
@@ -154,72 +169,72 @@ end)
 config.keys = {
   {
     key = 'w',
-    mods = 'CMD',
+    mods = super,
     action = wezterm.action.CloseCurrentPane { confirm = false }
   },
   {
     key = 'd',
-    mods = 'CMD',
+    mods = super,
     action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' }
   },
   {
     key = 'd',
-    mods = 'CMD|SHIFT',
+    mods = super .. '|SHIFT',
     action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' }
   },
   {
     key = 'Backspace',
-    mods = 'CMD',
+    mods = super,
     action = wezterm.action.SendString 'clear\n'
   },
   {
     key = 'h',
-    mods = 'CMD',
+    mods = super,
     action = wezterm.action.ActivatePaneDirection 'Left',
   },
   {
     key = 'j',
-    mods = 'CMD',
+    mods = super,
     action = wezterm.action.ActivatePaneDirection 'Down',
   },
   {
     key = 'k',
-    mods = 'CMD',
+    mods = super,
     action = wezterm.action.ActivatePaneDirection 'Up',
   },
   {
     key = 'l',
-    mods = 'CMD',
+    mods = super,
     action = wezterm.action.ActivatePaneDirection 'Right',
   },
   {
     key = 'h',
-    mods = 'CMD|ALT',
+    mods = super .. '|ALT',
     action = wezterm.action.AdjustPaneSize { 'Left', 5 },
   },
   {
     key = 'j',
-    mods = 'CMD|ALT',
+    mods = super .. '|ALT',
     action = wezterm.action.AdjustPaneSize { 'Down', 5 },
   },
   {
     key = 'k',
-    mods = 'CMD|ALT',
+    mods = super .. '|ALT',
     action = wezterm.action.AdjustPaneSize { 'Up', 5 },
   },
   {
     key = 'l',
-    mods = 'CMD|ALT',
+    mods = super .. '|ALT',
     action = wezterm.action.AdjustPaneSize { 'Right', 5 },
   },
   {
     key = 's',
-    mods = 'CMD|SHIFT',
+    mods = super .. '|SHIFT',
     action = wezterm.action.ShowLauncherArgs { flags = 'WORKSPACES' },
   },
   {
     key = 'n',
-    mods = 'CMD|SHIFT',
+    mods = super .. '|SHIFT',
     action = wezterm.action.PromptInputLine {
       description = wezterm.format {
         { Attribute = { Intensity = 'Bold' } },
@@ -240,17 +255,17 @@ config.keys = {
   },
   {
     key = 'o',
-    mods = 'CMD|SHIFT',
+    mods = super .. '|SHIFT',
     action = wezterm.action.SwitchWorkspaceRelative(-1),
   },
   {
     key = 'p',
-    mods = 'CMD|SHIFT',
+    mods = super .. '|SHIFT',
     action = wezterm.action.SwitchWorkspaceRelative(1),
   },
   {
     key = 'r',
-    mods = 'CMD|SHIFT',
+    mods = super .. '|SHIFT',
     action = wezterm.action.PromptInputLine {
       description = wezterm.format {
         { Attribute = { Intensity = 'Bold' } },

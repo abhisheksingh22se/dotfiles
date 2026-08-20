@@ -6,3 +6,10 @@
 
 # Rust build output for the sketchybar aerospace plugin
 target/
+
+# Safety net: never let anything secret-shaped land in this repo, now that it tracks
+# more of $HOME than it used to.
+.env
+*.pem
+id_rsa*
+.netrc

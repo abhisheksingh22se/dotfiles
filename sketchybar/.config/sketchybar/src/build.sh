@@ -2,7 +2,11 @@
 # Rebuild the AeroSpace workspace plugin and install it into plugins/.
 set -euo pipefail
 
-export PATH="/opt/homebrew/bin:$PATH"
+if [[ -d /opt/homebrew/bin ]]; then
+  export PATH="/opt/homebrew/bin:$PATH"
+else
+  export PATH="/usr/local/bin:$PATH"
+fi
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 crate="$here/sketchybar-aerospace-plugin"

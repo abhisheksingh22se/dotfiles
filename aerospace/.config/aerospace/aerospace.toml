@@ -6,8 +6,8 @@ config-version = 2
 # You can use it to add commands that run after AeroSpace startup.
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
-    'exec-and-forget /opt/homebrew/bin/sketchybar',
-    'exec-and-forget /opt/homebrew/bin/borders active_color=0x88ffffff inactive_color=0x20ffffff width=4.0'
+    'exec-and-forget /bin/bash -c "[ -x /opt/homebrew/bin/sketchybar ] && /opt/homebrew/bin/sketchybar || /usr/local/bin/sketchybar"',
+    'exec-and-forget /bin/bash -c "[ -x /opt/homebrew/bin/borders ] && /opt/homebrew/bin/borders active_color=0x88ffffff inactive_color=0x20ffffff width=4.0 || /usr/local/bin/borders active_color=0x88ffffff inactive_color=0x20ffffff width=4.0"'
 ]
 
 # Start AeroSpace at login
@@ -15,7 +15,7 @@ start-at-login = true
 
 # Trigger SketchyBar events for the Rust plugin
 exec-on-workspace-change = ['/bin/bash', '-c', '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED=$AEROSPACE_FOCUSED_WORKSPACE PREV_FOCUSED=$AEROSPACE_PREV_WORKSPACE']
-on-focus-changed = ['exec-and-forget /opt/homebrew/bin/sketchybar --trigger aerospace_focus_change']
+on-focus-changed = ['exec-and-forget /bin/bash -c "[ -x /opt/homebrew/bin/sketchybar ] && /opt/homebrew/bin/sketchybar --trigger aerospace_focus_change || /usr/local/bin/sketchybar --trigger aerospace_focus_change"']
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 enable-normalization-flatten-containers = true
