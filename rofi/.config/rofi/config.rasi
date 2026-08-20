@@ -1,0 +1,29 @@
+/* ~/.config/rofi/config.rasi
+ *
+ * Raycast's replacement. Behaviour only — the look lives in glass.rasi.
+ * Requires rofi-wayland (the X11 `rofi` package will not run under Hyprland).
+ */
+configuration {
+    modes: "drun,run,window,emoji,calc";
+    font: "Inter Medium 12";
+
+    drun-display-format: "{name}";
+    drun-match-fields:   "name,generic,exec,categories,keywords";
+    show-icons:          true;
+    icon-theme:          "Papirus-Dark";
+
+    /* Raycast ranks by frecency; this is the closest rofi gets. */
+    sorting-method:      "fzf";
+    matching:            "fuzzy";
+    sort:                true;
+
+    display-drun:   "";
+    display-run:    "";
+    display-window: "";
+    display-emoji:  "";
+    display-calc:   "";
+
+    kb-cancel: "Escape,Super+space";
+}
+
+@theme "glass"

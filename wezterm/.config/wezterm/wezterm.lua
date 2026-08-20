@@ -19,7 +19,20 @@ if is_windows then
 end
 
 if is_linux then
-  config.default_prog = { '/bin/bash' }
+  -- zsh is the login shell on the Arch box (the whole ~/.zshrc lives there); bash
+  -- would silently drop p10k, the plugins and every alias. Fall back to bash only if
+  -- zsh genuinely isn't installed yet.
+  local zsh = io.open('/usr/bin/zsh', 'r')
+  if zsh then
+    zsh:close()
+    config.default_prog = { '/usr/bin/zsh', '-l' }
+  else
+    config.default_prog = { '/bin/bash', '-l' }
+  end
+
+  -- Wayland-native. Under XWayland the window is neither blurred nor correctly
+  -- scaled on a HiDPI panel, so this is not optional under Hyprland.
+  config.enable_wayland = true
 end
 
 -- ─────────────────────────────────────────────
@@ -74,6 +87,10 @@ config.window_background_opacity = 0.80
 if is_macos then
   config.macos_window_background_blur = 38
 end
+-- On Linux there is no equivalent setting: WezTerm just renders translucent and the
+-- *compositor* blurs what shows through. Hyprland's `decoration.blur` block in
+-- hypr/.config/hypr/hyprland.lua is what supplies the frost, so the 0.80 above is
+-- doing the same job on both OSes through two different mechanisms.
 config.text_background_opacity = 0.90
 
 config.window_decorations = 'RESIZE'

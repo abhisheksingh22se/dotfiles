@@ -1,0 +1,109 @@
+/* ~/.config/rofi/glass.rasi
+ *
+ * Same glass vocabulary as waybar/style.css and hyprlock.conf. Hyprland blurs behind
+ * it via the `blur-launcher` layer rule in hyprland.lua — without that rule this is
+ * just a dark translucent box, so the two files have to stay in sync.
+ */
+
+* {
+    glass:        rgba(5, 8, 6, 72%);
+    glass-border: rgba(255, 255, 255, 12.5%);
+    text-color:   rgba(255, 255, 255, 92%);
+    text-muted:   rgba(255, 255, 255, 45%);
+    accent:       #6eeb91;
+    accent-soft:  rgba(110, 235, 145, 14%);
+    urgent:       #ff6978;
+
+    background-color: transparent;
+    margin:  0;
+    padding: 0;
+    spacing: 0;
+}
+
+window {
+    width:            640px;
+    border:           1px;
+    border-color:     @glass-border;
+    border-radius:    14px;
+    background-color: @glass;
+    padding:          8px;
+    location:         center;
+    anchor:           center;
+    y-offset:         -8%;   /* sits slightly above centre, like Spotlight/Raycast */
+}
+
+mainbox {
+    children: [ inputbar, message, listview ];
+    spacing:  6px;
+}
+
+inputbar {
+    children:         [ prompt, entry ];
+    background-color: rgba(255, 255, 255, 5%);
+    border:           1px;
+    border-color:     @glass-border;
+    border-radius:    10px;
+    padding:          10px 12px;
+    spacing:          10px;
+}
+
+prompt {
+    text-color: @accent;
+    font:       "Hack Nerd Font 13";
+    vertical-align: 0.5;
+}
+
+entry {
+    text-color:        @text-color;
+    placeholder:       "Search";
+    placeholder-color: @text-muted;
+    vertical-align:    0.5;
+    cursor:            text;
+}
+
+listview {
+    lines:         8;
+    columns:       1;
+    fixed-height:  false;
+    scrollbar:     false;
+    spacing:       2px;
+    padding:       4px 0px 0px 0px;
+    dynamic:       true;
+}
+
+element {
+    padding:       9px 12px;
+    border-radius: 10px;
+    spacing:       12px;
+    cursor:        pointer;
+}
+
+element normal.normal   { text-color: @text-color; }
+element alternate.normal{ text-color: @text-color; }
+
+element selected.normal {
+    background-color: @accent-soft;
+    text-color:       @accent;
+}
+
+element normal.urgent, element selected.urgent { text-color: @urgent; }
+
+element-icon {
+    size:           22px;
+    vertical-align: 0.5;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color:     inherit;
+}
+
+message {
+    padding:       8px 12px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 5%);
+}
+
+textbox {
+    text-color: @text-muted;
+}

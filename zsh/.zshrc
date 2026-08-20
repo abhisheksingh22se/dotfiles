@@ -1,3 +1,11 @@
+# ~/.zshrc — shared by macOS and Arch.
+#
+# The rule here: nothing may hard-code a Homebrew path or a macOS binary at top level.
+# Everything OS-specific goes behind `$is_mac` / `$is_linux` or through the small
+# `_source_first` helper, which sources the first file that actually exists out of a
+# list of candidates. That's what lets one file cover /opt/homebrew (macOS) and
+# /usr/share (Arch) without a second copy drifting out of sync.
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -5,39 +13,90 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-export JAVA_HOME=$(/usr/libexec/java_home)
-export PATH=$JAVA_HOME/bin:$PATH
-alias python=python3
+case "$OSTYPE" in
+  darwin*) is_mac=1; is_linux=0 ;;
+  linux*)  is_mac=0; is_linux=1 ;;
+  *)       is_mac=0; is_linux=0 ;;
+esac
 
-# Added by Antigravity
-export PATH="/Users/abhishek/.antigravity/antigravity/bin:$PATH"
+# Source the first candidate that exists; ignore the rest. Silent when none match, so
+# a machine that simply doesn't have a plugin installed yet doesn't spew on every
+# new shell.
+_source_first() {
+  local f
+  for f in "$@"; do
+    if [[ -r "$f" ]]; then
+      source "$f"
+      return 0
+    fi
+  done
+  return 1
+}
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/abhishek/.lmstudio/bin"
-# End of LM Studio CLI section
+# Prepend to PATH only if the directory exists and isn't already there. Keeps PATH from
+# growing on every `exec zsh`.
+_path_prepend() {
+  local d
+  for d in "$@"; do
+    [[ -d "$d" ]] || continue
+    case ":$PATH:" in
+      *":$d:"*) ;;
+      *) PATH="$d:$PATH" ;;
+    esac
+  done
+  export PATH
+}
 
+# ─────────────────────────────────────────────
+# Java
+# ─────────────────────────────────────────────
+# macOS has /usr/libexec/java_home; Arch installs JDKs under /usr/lib/jvm with a
+# `default` symlink maintained by archlinux-java.
+if (( is_mac )) && [[ -x /usr/libexec/java_home ]]; then
+  export JAVA_HOME="$(/usr/libexec/java_home 2>/dev/null)"
+elif [[ -d /usr/lib/jvm/default ]]; then
+  export JAVA_HOME=/usr/lib/jvm/default
+fi
+[[ -n "${JAVA_HOME:-}" ]] && _path_prepend "$JAVA_HOME/bin"
 
-# Added by Antigravity IDE
-export PATH="/Users/abhishek/.antigravity-ide/antigravity-ide/bin:$PATH"
+# ─────────────────────────────────────────────
+# PATH
+# ─────────────────────────────────────────────
+_path_prepend \
+  "$HOME/.cargo/bin" \
+  "$HOME/.local/bin" \
+  "$HOME/.antigravity/antigravity/bin" \
+  "$HOME/.antigravity-ide/antigravity-ide/bin" \
+  "$HOME/.lmstudio/bin"
 
-. "$HOME/.local/bin/env"
-export PATH="$HOME/Library/Python/3.9/bin:$PATH"
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/abhishek/.docker/completions $fpath)
+if (( is_mac )); then
+  _path_prepend "$HOME/Library/Python/3.9/bin"
+fi
+
+# uv / rye style env file, if present
+[[ -r "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
+# ─────────────────────────────────────────────
+# Completions
+# ─────────────────────────────────────────────
+[[ -d "$HOME/.docker/completions" ]] && fpath=("$HOME/.docker/completions" $fpath)
 autoload -Uz compinit
 compinit
-# End of Docker CLI completions
 
-# Clean, monotone mo status loop (strips colors and applies Dark Grey ANSI)
-alias mostat='while true; do tput cup 0 0; printf "\e[38;5;244m"; mo status | perl -pe "s/\x1b\[[0-9;]*m//g"; printf "\e[0m"; sleep 2; done'
-alias ymc="clear && ymc"
-export PATH="$HOME/.cargo/bin:$PATH"
-source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+# ─────────────────────────────────────────────
+# Prompt — Powerlevel10k
+# ─────────────────────────────────────────────
+_source_first \
+  /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme \
+  /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme \
+  /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# history setup
+# ─────────────────────────────────────────────
+# History
+# ─────────────────────────────────────────────
 HISTFILE=$HOME/.zhistory
 SAVEHIST=1000
 HISTSIZE=999
@@ -49,21 +108,62 @@ setopt hist_verify
 # completion using arrow keys (based on history)
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# ─────────────────────────────────────────────
+# Plugins
+# ─────────────────────────────────────────────
+_source_first \
+  /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+  /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+  /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# Syntax highlighting must be sourced last of the plugins — it wraps the ZLE widgets
+# that everything before it defines.
+_source_first \
+  /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+  /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+  /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# ─────────────────────────────────────────────
+# Tools
+# ─────────────────────────────────────────────
+alias python=python3
 
 # ---- Eza (better ls) -----
-
-alias ls="eza --icons=always"
+command -v eza >/dev/null 2>&1 && alias ls="eza --icons=always"
 
 # ---- Zoxide (better cd) ----
-eval "$(zoxide init zsh)"
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+  alias cd="z"
+fi
 
-alias cd="z"
+# ─────────────────────────────────────────────
+# Aliases
+# ─────────────────────────────────────────────
+alias ymc="clear && ymc"
 
+if (( is_mac )); then
+  # Clean, monotone mo status loop (strips colors and applies Dark Grey ANSI).
+  # `mo` is macOS-only (Homebrew `mole`), so the alias is too.
+  alias mostat='while true; do tput cup 0 0; printf "\e[38;5;244m"; mo status | perl -pe "s/\x1b\[[0-9;]*m//g"; printf "\e[0m"; sleep 2; done'
+fi
 
-# Added by Antigravity CLI installer
-export PATH="/Users/abhishek/.local/bin:$PATH"
+if (( is_linux )); then
+  # Hyprland/Wayland conveniences. `hypr-reload` is the equivalent of AeroSpace's
+  # `alt-shift-semicolon esc` service-mode reload, from a shell.
+  alias hypr-reload='hyprctl reload && pkill -SIGUSR2 waybar && makoctl reload'
+  alias hypr-log='tail -f "$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/hyprland.log"'
+  alias waybar-restart='pkill waybar; (waybar &) >/dev/null 2>&1'
+  alias gpu='supergfxctl -g'
+  alias gpu-int='supergfxctl -m Integrated'
+  alias gpu-hyb='supergfxctl -m Hybrid'
+  alias battery='cat /sys/class/power_supply/BAT0/capacity'
+  # pbcopy/pbpaste muscle memory, backed by wl-clipboard.
+  command -v wl-copy  >/dev/null 2>&1 && alias pbcopy='wl-copy'
+  command -v wl-paste >/dev/null 2>&1 && alias pbpaste='wl-paste'
+  alias open='xdg-open'
+fi
 
-# Added by Antigravity IDE
-export PATH="/Users/abhishek/.antigravity-ide/antigravity-ide/bin:$PATH"
+unset -f _source_first _path_prepend
+unset is_mac is_linux

@@ -1,0 +1,224 @@
+// ~/.config/waybar/config.jsonc
+//
+// Waybar as a port of sketchybar/.config/sketchybar/sketchybarrc. The geometry is
+// copied over literally:
+//
+//   sketchybar --bar height=32 color=0x00000000 blur_radius=30 position=top
+//                    margin=5 y_offset=8 border_width=0
+//
+// The bar itself is fully transparent; the visible "glass capsules" are the bracket
+// groups, styled in style.css. Anything that was a `--add bracket` there is a
+// `group/...` here.
+{
+  "layer": "top",
+  "position": "top",
+  "height": 32,
+  "spacing": 0,
+
+  // sketchybar: margin=5, y_offset=8
+  "margin-top": 8,
+  "margin-left": 5,
+  "margin-right": 5,
+
+  // Only reserve the bar's own strip; hyprland.lua's gaps_out adds the rest.
+  "exclusive": true,
+  "fixed-center": true,
+
+  "modules-left": ["group/spaces", "group/app"],
+  "modules-center": [],
+  "modules-right": ["group/media", "group/sys", "group/clock", "tray"],
+
+  // ── Left: workspace indicators ────────────────────────────────────────────────
+  // The macOS side used a Rust plugin to render AeroSpace workspaces with the app
+  // icons living in each one. Waybar does the same thing natively via
+  // window-rewrite, so there is nothing to compile here.
+  "group/spaces": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+
+  "hyprland/workspaces": {
+    "format": "{name} {windows}",
+    "format-window-separator": " ",
+    "window-rewrite-default": "",
+    "window-rewrite": {
+      "class<org.wezfurlong.wezterm>": "",
+      "class<wezterm>": "",
+      "class<kitty>": "",
+      "class<dev.warp.Warp>": "",
+      "class<Code>": "󰨞",
+      "class<code-oss>": "󰨞",
+      "class<VSCodium>": "󰨞",
+      "class<Antigravity>": "󱚝",
+      "class<zen>": "󰈹",
+      "class<zen-browser>": "󰈹",
+      "class<firefox>": "󰈹",
+      "class<Brave-browser>": "",
+      "class<brave-browser>": "",
+      "class<Spotify>": "",
+      "class<.*youtube_music.*>": "󰗃",
+      "class<brave-.*-Default>": "󰗃",
+      "class<thunar>": "",
+      "class<Thunar>": "",
+      "class<mpv>": "",
+      "class<discord>": "",
+      "class<obsidian>": "󱓧",
+      "class<org.pulseaudio.pavucontrol>": "",
+      "class<rog-control-center>": "󰢮"
+    },
+    "all-outputs": false,
+    "show-special": true,
+    "special-visible-only": true,
+    "on-click": "activate",
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1",
+    "sort-by-number": true
+  },
+
+  // ── Left: chevron + focused app ───────────────────────────────────────────────
+  // sketchybar: `chevron` item (icon ) + `front_app` item, wrapped in left_capsule.
+  "group/app": {
+    "orientation": "horizontal",
+    "modules": ["custom/chevron", "hyprland/window"]
+  },
+
+  "custom/chevron": {
+    "format": "",
+    "tooltip": false,
+    // sketchybar's chevron click_script was `aerospace layout floating tiling`
+    "on-click": "hyprctl dispatch togglefloating"
+  },
+
+  "hyprland/window": {
+    "format": "{class}",
+    "rewrite": {
+      "": "Desktop",
+      "org.wezfurlong.wezterm": "WezTerm",
+      "code-oss": "VS Code",
+      "Code": "VS Code",
+      "zen": "Zen",
+      "zen-browser": "Zen",
+      "Brave-browser": "Brave",
+      "org.pulseaudio.pavucontrol": "Volume"
+    },
+    "separate-outputs": true,
+    "max-length": 28,
+    "tooltip-format": "{title}"
+  },
+
+  // ── Right: now playing ────────────────────────────────────────────────────────
+  // Replaces plugins/wnp-daemon/media_daemon.py wholesale. That daemon existed only
+  // because macOS has no MPRIS; on Linux every player publishes to MPRIS already, so
+  // this is a built-in module instead of a Python venv.
+  "group/media": {
+    "orientation": "horizontal",
+    "modules": ["mpris"]
+  },
+
+  "mpris": {
+    "format": "{player_icon} {dynamic}",
+    "format-paused": "{status_icon} <i>{dynamic}</i>",
+    "dynamic-order": ["title", "artist"],
+    "dynamic-len": 30,
+    "interval": 1,
+    "player-icons": {
+      "default": "",
+      "mpv": "",
+      "firefox": "󰈹",
+      "brave": "",
+      "chromium": "",
+      "spotify": ""
+    },
+    "status-icons": { "paused": "" },
+    "ignored-players": ["kdeconnect"],
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl next",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "tooltip-format": "{player}: {title} — {artist}"
+  },
+
+  // ── Right: system ─────────────────────────────────────────────────────────────
+  // sketchybar's right_capsule held clock + battery. Network and volume are added
+  // here because macOS put them in the menu bar, which Linux has no equivalent of.
+  "group/sys": {
+    "orientation": "horizontal",
+    "modules": ["custom/gpu", "network", "pulseaudio", "battery"]
+  },
+
+  // Which GPU mode supergfxctl is in — the one G14-specific thing worth always seeing,
+  // since it decides both battery life and whether the dGPU is even available.
+  "custom/gpu": {
+    "exec": "supergfxctl -g 2>/dev/null | tr -d '\\n'",
+    "interval": 30,
+    "format": "{}",
+    "tooltip": false,
+    "on-click": "rog-control-center"
+  },
+
+  "network": {
+    "format-wifi": "",
+    "format-ethernet": "󰈀",
+    "format-linked": "󰈀",
+    "format-disconnected": "󰤭",
+    "tooltip-format-wifi": "{essid}  {signalStrength}%  ({ipaddr})",
+    "tooltip-format-ethernet": "{ifname}  {ipaddr}",
+    "tooltip-format-disconnected": "Disconnected",
+    "on-click": "nm-connection-editor"
+  },
+
+  "pulseaudio": {
+    // sketchybar's volume.sh printed a bare percentage with no icon; keep the icon
+    // here since there's no menu bar fallback to check.
+    "format": "{icon}",
+    "format-muted": "󰝟",
+    "format-bluetooth": "{icon}󰂯",
+    "format-icons": { "headphone": "", "headset": "", "default": ["", "", ""] },
+    "tooltip-format": "{desc}  {volume}%",
+    "on-click": "pavucontrol",
+    "on-click-right": "swayosd-client --output-volume mute-toggle",
+    "on-scroll-up": "swayosd-client --output-volume raise",
+    "on-scroll-down": "swayosd-client --output-volume lower"
+  },
+
+  // Glyphs and thresholds match plugins/battery.sh exactly.
+  "battery": {
+    "states": { "warning": 20, "critical": 10 },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰂄 {capacity}%",
+    "format-icons": ["󰂃", "󰁼", "󰁾", "󰂀", "󰁹"],
+    "interval": 30,
+    "tooltip-format": "{timeTo}  ({power}W)"
+  },
+
+  // ── Right: clock ──────────────────────────────────────────────────────────────
+  "group/clock": {
+    "orientation": "horizontal",
+    "modules": ["clock"]
+  },
+
+  // Format string lifted verbatim from plugins/clock.sh: date "+%a %b %d, %H:%M"
+  "clock": {
+    "interval": 10,
+    "format": "{:%a %b %d, %H:%M}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "month",
+      "weeks-pos": "right",
+      "format": {
+        "months":  "<span color='#ffffff'><b>{}</b></span>",
+        "days":    "<span color='#b0b0b0'>{}</span>",
+        "weeks":   "<span color='#6eeb91'><b>W{}</b></span>",
+        "weekdays":"<span color='#e6d267'><b>{}</b></span>",
+        "today":   "<span color='#39ff88'><b><u>{}</u></b></span>"
+      }
+    },
+    "actions": { "on-click-right": "mode", "on-scroll-up": "shift_up", "on-scroll-down": "shift_down" }
+  },
+
+  "tray": {
+    "icon-size": 15,
+    "spacing": 10
+  }
+}

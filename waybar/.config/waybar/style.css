@@ -1,0 +1,206 @@
+/* ~/.config/waybar/style.css
+ *
+ * Every value here is traceable to sketchybar/.config/sketchybar/sketchybarrc:
+ *
+ *   bar          color=0x00000000                -> transparent window
+ *   brackets     background.color=0x25000000     -> rgba(0,0,0,0.145)
+ *                background.border_color=0x20ffffff -> rgba(255,255,255,0.125)
+ *                background.corner_radius=10 / border_width=1 / height=26
+ *   defaults     icon.color=label.color=0x99ffffff  -> rgba(255,255,255,0.6)
+ *                icon.font="Hack Nerd Font:Bold:14"
+ *                label.font="SF Pro:Semibold:13"
+ *
+ * SF Pro doesn't exist on Linux. Inter is the closest widely-packaged match for its
+ * metrics and its grotesque feel; install `inter-font` from the repos. The fallbacks
+ * after it are there so the bar never falls back to something serif.
+ */
+
+@define-color glass       rgba(0, 0, 0, 0.145);
+@define-color glassBorder rgba(255, 255, 255, 0.125);
+@define-color text        rgba(255, 255, 255, 0.6);
+@define-color textBright  rgba(255, 255, 255, 0.92);
+@define-color accent      #6eeb91;   /* wezterm active-tab foreground */
+@define-color accentHot   #39ff88;   /* wezterm cursor */
+@define-color muted       rgba(255, 255, 255, 0.35);
+@define-color warn        #e6d267;
+@define-color crit        #ff6978;
+
+* {
+  font-family: "Inter", "SF Pro Display", "Hack Nerd Font", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  /* Waybar draws a 1px text shadow by default that muddies light-on-glass text. */
+  text-shadow: none;
+  box-shadow: none;
+}
+
+/* The bar window itself is invisible. Only the capsules below are drawn — the same
+   inversion sketchybar uses (bar color 0x00000000, brackets carry all the styling). */
+window#waybar {
+  background: transparent;
+  color: @text;
+}
+
+window#waybar.hidden { opacity: 0; }
+
+/* ── The glass capsule ────────────────────────────────────────────────────────────
+   sketchybar's `--add bracket`. 26px tall inside a 32px bar leaves 3px above and
+   below, which is exactly the inset the macOS bar has. */
+#spaces,
+#app,
+#media,
+#sys,
+#clock {
+  background-color: @glass;
+  border: 1px solid @glassBorder;
+  border-radius: 10px;
+  min-height: 26px;
+  margin: 3px 0px;
+  padding: 0px 2px;
+}
+
+/* Gaps between capsules, and from the screen edges. */
+.modules-left  > widget:not(:first-child) > * { margin-left: 6px; }
+.modules-right > widget:not(:last-child)  > * { margin-right: 6px; }
+.modules-left  { margin-left: 4px; }
+.modules-right { margin-right: 4px; }
+
+/* Hide an empty media capsule instead of leaving a floating empty pill — the macOS
+   side did this with `drawing=off` on the media items. */
+#media {
+  padding: 0px;
+  margin: 3px 0px;
+}
+#mpris {
+  padding: 0px 10px;
+  color: @text;
+}
+#mpris.paused { color: @muted; }
+#mpris.stopped {
+  /* Collapses the capsule to nothing when no player is running. */
+  padding: 0px;
+  margin: 0px;
+  opacity: 0;
+}
+
+/* ── Workspaces ───────────────────────────────────────────────────────────────── */
+#workspaces {
+  padding: 0px 2px;
+}
+
+#workspaces button {
+  color: @muted;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0px 8px;
+  margin: 0px 1px;
+  font-family: "Hack Nerd Font", monospace;
+  font-size: 13px;
+  font-weight: bold;
+  /* Waybar animates padding on hover unless this is pinned, which makes the whole
+     bar jitter as you move across it. */
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+#workspaces button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: @text;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Focused workspace — the one thing that gets the mint accent, so it reads at a
+   glance the way the highlighted AeroSpace space did. */
+#workspaces button.active {
+  background-color: rgba(110, 235, 145, 0.14);
+  color: @accentHot;
+}
+
+/* Visible on another monitor but not focused */
+#workspaces button.visible {
+  color: @text;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+#workspaces button.urgent {
+  background-color: rgba(255, 105, 120, 0.18);
+  color: @crit;
+}
+
+#workspaces button.special {
+  color: @warn;
+}
+
+/* ── Chevron + focused app ────────────────────────────────────────────────────── */
+#custom-chevron {
+  font-family: "Hack Nerd Font", monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: @text;
+  padding: 0px 2px 0px 8px;   /* sketchybar: icon.padding_left=6, padding_left=4 */
+}
+
+#window {
+  color: @textBright;
+  padding: 0px 8px 0px 4px;   /* sketchybar: label.padding_left=2, label.padding_right=6 */
+}
+
+/* ── System group ─────────────────────────────────────────────────────────────── */
+#network,
+#pulseaudio,
+#battery,
+#custom-gpu {
+  font-family: "Hack Nerd Font", monospace;
+  color: @text;
+  padding: 0px 7px;
+}
+
+#custom-gpu {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  color: @muted;
+  padding: 0px 8px 0px 10px;
+}
+
+#network.disconnected { color: @crit; }
+#pulseaudio.muted     { color: @muted; }
+
+#battery { padding: 0px 10px 0px 7px; }
+#battery.charging, #battery.plugged { color: @accent; }
+#battery.warning:not(.charging)     { color: @warn; }
+#battery.critical:not(.charging) {
+  color: @crit;
+  animation: blink 1.2s steps(2, start) infinite alternate;
+}
+
+@keyframes blink {
+  to { color: @textBright; }
+}
+
+/* ── Clock ────────────────────────────────────────────────────────────────────── */
+#clock {
+  color: @textBright;
+  padding: 0px 12px;
+}
+
+/* ── Tray ─────────────────────────────────────────────────────────────────────── */
+#tray {
+  padding: 0px 8px;
+  margin: 3px 0px;
+}
+#tray > .passive { -gtk-icon-effect: dim; }
+#tray > .needs-attention { -gtk-icon-effect: highlight; }
+
+/* ── Tooltips: same glass, since they float over the desktop too ──────────────── */
+tooltip {
+  background: rgba(5, 8, 6, 0.92);
+  border: 1px solid @glassBorder;
+  border-radius: 10px;
+}
+tooltip label {
+  color: @textBright;
+  padding: 4px;
+}

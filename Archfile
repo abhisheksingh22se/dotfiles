@@ -1,0 +1,179 @@
+# Archfile — the Arch counterpart to Brewfile.
+#
+# Same idea, same vocabulary: one package per line, prefixed by where it comes from.
+#   pac    official repos (pacman)
+#   aur    AUR (yay)
+#   npm    global npm package
+#   cargo  cargo install
+# Blank lines and `#` comments are ignored. Read by bootstrap.sh on Linux.
+#
+# Every Brewfile entry is accounted for below — either ported, or listed under
+# "Deliberately not ported" at the bottom with the reason. If you add something to
+# the Brewfile, the honest thing is to decide its fate here in the same commit.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Compositor and desktop shell   (macOS: aerospace, sketchybar, borders, raycast)
+# ─────────────────────────────────────────────────────────────────────────────
+pac hyprland                  # <- aerospace
+pac waybar                    # <- sketchybar
+pac hyprlock
+pac hypridle
+pac hyprpaper
+pac hyprpicker                # colour picker
+pac hyprpolkitagent           # GUI auth prompts; without it sudo-GUI actions hang
+pac rofi-wayland              # <- raycast. NOT plain `rofi` — that one is X11-only.
+pac mako                      # notifications (macOS had none to port; it just had NC)
+pac wl-clipboard
+pac cliphist                  # <- raycast clipboard history
+pac grim
+pac slurp
+pac brightnessctl
+pac playerctl                 # <- plugins/wnp-daemon/media_daemon.py, but built in
+pac qt5-wayland
+pac qt6-wayland
+pac xdg-desktop-portal-hyprland
+pac xdg-desktop-portal-gtk    # file pickers for GTK apps; not optional in practice
+pac polkit
+aur swayosd                   # macOS-style volume/brightness OSD overlay
+aur wlogout                   # power menu
+aur rofi-emoji                # SUPER+. picker
+aur rofi-calc
+
+# `borders` has no port and needs none — Hyprland draws window borders itself, and
+# hyprland.lua already carries the 0x88ffffff / 0x20ffffff colours it was configured
+# with. Same for `swipeaerospace`: hl.gesture() is native.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fonts
+# ─────────────────────────────────────────────────────────────────────────────
+pac ttf-hack-nerd             # <- font-hack-nerd-font  (wezterm + all bar icons)
+pac ttf-meslo-nerd            # <- font-meslo-lg-nerd-font (p10k's recommended font)
+pac ttf-nerd-fonts-symbols    # <- font-symbols-only-nerd-font
+pac inter-font                # stand-in for SF Pro, which is macOS-only
+pac noto-fonts
+pac noto-fonts-emoji
+pac noto-fonts-cjk
+pac papirus-icon-theme        # rofi/waybar app icons
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Terminal and shell            (unchanged from the Brewfile — all cross-platform)
+# ─────────────────────────────────────────────────────────────────────────────
+pac wezterm
+pac zsh
+pac zsh-autosuggestions
+pac zsh-syntax-highlighting
+pac zsh-theme-powerlevel10k   # <- powerlevel10k
+pac stow
+pac tmux
+pac git
+pac bat
+pac eza
+pac fd
+pac fzf
+pac ripgrep
+pac zoxide
+pac yazi
+pac lazygit
+pac btop
+pac ncdu
+pac jq
+pac chafa
+pac libsixel
+pac neovim
+pac vi                        # <- nvi
+pac man-db
+pac less
+pac wget
+pac curl
+pac unzip
+pac zip
+pac openssh
+pac fastfetch
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Media
+# ─────────────────────────────────────────────────────────────────────────────
+pac mpv
+pac ffmpeg                    # <- ffmpeg-full
+pac imagemagick
+pac yt-dlp
+pac poppler
+pac resvg
+cargo youtube-tui
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Development
+# ─────────────────────────────────────────────────────────────────────────────
+pac python
+pac python-pipx               # <- pipx
+pac nodejs
+pac npm
+pac rust
+pac jdk-openjdk               # JAVA_HOME in .zshrc resolves against this on Linux
+pac maven
+pac docker                    # <- Docker Desktop
+pac docker-compose
+pac docker-buildx
+pac mariadb                   # <- mysql
+pac helm
+pac minikube
+pac kubectl
+pac pkgconf
+pac 7zip                      # <- sevenzip
+pac act
+aur trivy-bin                 # <- trivy
+aur wtfutil-bin               # <- wtfutil
+npm yarn
+npm tailwindcss
+npm snyk
+npm solc
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Applications
+# ─────────────────────────────────────────────────────────────────────────────
+aur zen-browser-bin           # <- cask zen
+aur visual-studio-code-bin    # <- the `vscode "..."` extension list in Brewfile
+aur warp-terminal             # <- cask warp
+pac thunar                    # file manager (SUPER+E in hyprland.lua)
+pac thunar-volman
+pac gvfs
+pac tumbler
+pac ffmpegthumbnailer
+pac pavucontrol
+pac blueman
+pac network-manager-applet
+
+# ─────────────────────────────────────────────────────────────────────────────
+# System / laptop               (no macOS counterpart — the OS did these itself)
+# ─────────────────────────────────────────────────────────────────────────────
+pac pipewire
+pac pipewire-pulse
+pac pipewire-alsa
+pac wireplumber
+pac bluez
+pac bluez-utils
+pac exfatprogs                # the shared macOS<->Linux backup partition
+pac timeshift
+pac ufw
+pac nwg-look                  # GTK theme/font/cursor picker
+pac qt6ct                     # QT_QPA_PLATFORMTHEME=qt6ct is set in hyprland.lua
+pac kvantum
+
+# G14-specific. asusctl/supergfxctl come from the [g14] repo added in
+# upc-plans/linux-setup.md §8, not from the AUR — add that repo before running
+# bootstrap.sh or these two will not resolve.
+pac asusctl
+pac supergfxctl
+aur rog-control-center
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Deliberately not ported
+# ─────────────────────────────────────────────────────────────────────────────
+#   sketchybar, borders, aerospace, swipeaerospace  macOS-only by construction;
+#                                                   replaced above, see README.
+#   font-sketchybar-app-font                        only sketchybar consumed it.
+#   mole                                            macOS cleaner; `pacman -Sc`,
+#                                                   `paccache -r` and ncdu cover it.
+#   raycast                                         rofi-wayland + cliphist + rofi-calc.
+#   python@3.12 / python@3.14                       Arch ships one `python`; use
+#                                                   pyenv or uv for pinned versions.

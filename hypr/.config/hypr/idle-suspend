@@ -1,0 +1,22 @@
+#!/bin/sh
+# ~/.config/hypr/idle-suspend
+#
+# Suspend, unless the laptop is plugged in — a MacBook stays awake on the charger and
+# this keeps that behaviour. Called from hypridle.conf's last listener.
+#
+# Deliberately a file rather than an inline `on-timeout` command: hypridle runs each
+# on-timeout through a shell, so an inline version would need quotes nested inside
+# quotes, which is exactly the kind of thing that fails silently at 3am and leaves you
+# wondering why the machine died mid-download.
+#
+# No .sh extension on purpose — the repo's .stow-local-ignore filters `*.sh`, and this
+# file has to survive stow.
+
+for f in /sys/class/power_supply/AC*/online /sys/class/power_supply/ADP*/online; do
+    [ -r "$f" ] || continue
+    if [ "$(cat "$f")" = "1" ]; then
+        exit 0      # on mains power: stay awake
+    fi
+done
+
+exec systemctl suspend

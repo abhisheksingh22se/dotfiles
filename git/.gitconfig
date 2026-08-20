@@ -1,5 +1,8 @@
 [core]
-	excludesfile = /Users/abhishek/.gitignore_global
+	# ~ rather than /Users/abhishek — this file is symlinked onto a Linux box where
+	# $HOME is /home/abhishek, and an absolute macOS path silently disables the
+	# global ignore list there instead of erroring.
+	excludesfile = ~/.gitignore_global
 [user]
 	name = Abhishek Singh
 	email = abhisheksingh22se@gmail.com
