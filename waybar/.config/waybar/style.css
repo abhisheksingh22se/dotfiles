@@ -49,6 +49,9 @@ window#waybar.hidden { opacity: 0; }
 /* ── The glass capsule ────────────────────────────────────────────────────────────
    sketchybar's `--add bracket`. 26px tall inside a 32px bar leaves 3px above and
    below, which is exactly the inset the macOS bar has. */
+/* The bar surface is 40px tall (see config.jsonc for why it isn't 32 + an 8px layer
+   margin). 11px top + 26px capsule + 3px bottom = 40, which puts the capsule in the
+   same place on screen the macOS bar sits, with the whole strip reserved. */
 #spaces,
 #app,
 #media,
@@ -58,7 +61,7 @@ window#waybar.hidden { opacity: 0; }
   border: 1px solid @glassBorder;
   border-radius: 10px;
   min-height: 26px;
-  margin: 3px 0px;
+  margin: 11px 0px 3px 0px;
   padding: 0px 2px;
 }
 
@@ -72,7 +75,7 @@ window#waybar.hidden { opacity: 0; }
    side did this with `drawing=off` on the media items. */
 #media {
   padding: 0px;
-  margin: 3px 0px;
+  margin: 11px 0px 3px 0px;
 }
 #mpris {
   padding: 0px 10px;
@@ -189,7 +192,7 @@ window#waybar.hidden { opacity: 0; }
 /* ── Tray ─────────────────────────────────────────────────────────────────────── */
 #tray {
   padding: 0px 8px;
-  margin: 3px 0px;
+  margin: 11px 0px 3px 0px;
 }
 #tray > .passive { -gtk-icon-effect: dim; }
 #tray > .needs-attention { -gtk-icon-effect: highlight; }

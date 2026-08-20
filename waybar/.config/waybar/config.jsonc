@@ -12,15 +12,25 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 32,
   "spacing": 0,
 
-  // sketchybar: margin=5, y_offset=8
-  "margin-top": 8,
+  // 40 = the 32px bar + sketchybar's 8px y_offset, and NOT `height: 32` with
+  // `margin-top: 8`.
+  //
+  // The margin version is what made the bar sit on top of windows: waybar's exclusive
+  // zone is derived from the layer surface's height, so a top margin pushes the bar
+  // down 8px into space nothing reserved. Windows tile from y=32 while the bar is
+  // drawn from y=8 to y=40 — an 8px overlap along the bottom edge of the bar.
+  //
+  // Making the surface a full 40px tall means the reserved zone always equals the
+  // visual footprint. The 8px of empty space at the top is produced in style.css
+  // instead, by the capsules' top margin, where it costs nothing.
+  "height": 40,
   "margin-left": 5,
   "margin-right": 5,
 
-  // Only reserve the bar's own strip; hyprland.lua's gaps_out adds the rest.
+  // Reserve the bar's own strip so windows tile beneath it rather than under it.
+  // hyprland.lua's gaps_out adds breathing room on top of this.
   "exclusive": true,
   "fixed-center": true,
 

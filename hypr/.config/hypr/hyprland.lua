@@ -111,19 +111,48 @@ end
 -- similar) and an exact-match mode string that misses is rejected outright. The stock
 -- `preferred` can settle on 60Hz, and a panel below its native mode is the *other* way
 -- a desktop ends up looking oversized and soft.
-hl.monitor({
-    output   = "eDP-1",
-    mode     = "highrr",
-    position = "auto",
-    scale    = internalScale,
-})
+-- The internal panel is `eDP-1` on this laptop, but that is not guaranteed — it
+-- depends on the driver and, on a mux'd machine, on which GPU is driving the display.
+-- If the name is wrong the rule matches nothing, the wildcard below applies instead,
+-- and you get the oversized desktop this whole block exists to prevent. So: emit a
+-- rule for every internal-looking output actually present, and keep the static eDP-1
+-- rule as a fallback for when the query isn't answerable yet.
+--
+-- Confirm the real name with: hyprctl monitors
+local internalOutputs = {}
+pcall(function()
+    for _, m in ipairs(hl.get_monitors() or {}) do
+        local name = tostring(m.name)
+        if name:match("^eDP") or name:match("^LVDS") or name:match("^DSI") then
+            internalOutputs[#internalOutputs + 1] = name
+        end
+    end
+end)
 
--- Everything else (external displays) at native, placed to the right.
+if #internalOutputs == 0 then
+    internalOutputs = { "eDP-1" }
+end
+
+for _, output in ipairs(internalOutputs) do
+    hl.monitor({
+        output   = output,
+        mode     = "highrr",
+        position = "auto",
+        scale    = internalScale,
+    })
+end
+
+-- Everything else (external displays) at native.
+--
+-- scale = 1 rather than "auto" on purpose: "auto" is what rounds a HiDPI panel up to
+-- 2.0 and produces a 1280x720 desktop. If a rule above ever fails to match, falling
+-- through to 1 gives a display that is too *small* — visibly wrong but usable and
+-- obvious, rather than the silent inflation that sent us round this loop once already.
 hl.monitor({
     output   = "",
     mode     = "preferred",
     position = "auto",
-    scale    = "auto",
+    scale    = 1,
 })
 
 
