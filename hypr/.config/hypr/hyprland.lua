@@ -202,7 +202,7 @@ hl.on("hyprland.start", function()
     -- before the rest.
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
 
-    hl.exec_cmd("waybar")                                   -- SketchyBar's counterpart
+    -- hl.exec_cmd("waybar")                                   -- SketchyBar's counterpart
     hl.exec_cmd("hyprpaper")                                -- wallpaper
     hl.exec_cmd("mako")                                     -- notifications
     hl.exec_cmd("hypridle")                                 -- idle -> lock -> dpms
