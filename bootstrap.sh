@@ -226,7 +226,7 @@ fi
 # Directories the configs assume exist. Cheap to create, annoying to debug when absent
 # (hyprpaper silently shows nothing, grim fails with a bare "no such file").
 if [[ "$os" == linux ]]; then
-  mkdir -p "$HOME/Pictures/screenshots" "$HOME/Pictures/wallpapers"
+  mkdir -p "$HOME/Pictures/screenshots" "$HOME/Wallpaper"
 fi
 
 if [[ -n "${failed_pkgs// /}" ]]; then

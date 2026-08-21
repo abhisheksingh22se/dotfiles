@@ -94,9 +94,20 @@ end
 config.text_background_opacity = 0.90
 
 config.window_decorations = 'RESIZE'
+
+-- 'none' is not a color WezTerm can parse — it goes through a CSS colour parser that
+-- knows names, #rrggbb and rgba(), and nothing else. An unparsable value here doesn't
+-- disable the titlebar, it falls back to the built-in opaque slate, which is what the
+-- solid strip along the frame was. rgba(0,0,0,0) is the same intent, spelled in
+-- something the parser accepts.
+--
+-- (window_frame only governs the *fancy* tab bar, which is off below — but leaving a
+-- broken value here is a trap for the next person who flips use_fancy_tab_bar back on.)
 config.window_frame = {
-  active_titlebar_bg = 'none',
-  inactive_titlebar_bg = 'none',
+  active_titlebar_bg   = 'rgba(0, 0, 0, 0)',
+  inactive_titlebar_bg = 'rgba(0, 0, 0, 0)',
+  active_titlebar_fg   = '#A8E6B0',
+  inactive_titlebar_fg = '#85998C',
 }
 
 config.window_padding = {
@@ -129,12 +140,28 @@ wezterm.on('update-status', function(window, pane)
   local mux_window = window:mux_window()
   local tabs = mux_window:tabs_with_info()
   
-  -- Liquid Glass Aesthetic
-  local bg_active = '#1E2D23'     -- Raised glossy dark green/slate
-  local fg_active = '#6EEB91'     -- Soft glowing sage (bright, not neon)
-  
-  local bg_inactive = '#111814'   -- Deep, heavy frosted glass
-  local fg_inactive = '#85998C'   -- Legible but muted sage-grey
+  -- Liquid Glass Aesthetic.
+  --
+  -- These were opaque hex (#1E2D23 / #111814). Opaque is the wrong choice for a pill
+  -- that floats on a window already at window_background_opacity = 0.80: the rest of
+  -- the surface shows the blurred desktop through it and the pill doesn't, so the tab
+  -- strip reads as a solid bar glued across the frame instead of part of the glass.
+  --
+  -- rgba() here composites against the *translucent* window background, so the pills
+  -- pick up the same frost as everything else. The alphas are deliberately low — this
+  -- is the same 0.14 mint / 0.06 white vocabulary the waybar capsules use for their
+  -- active and inactive workspace chips, so the terminal's tabs and the bar's
+  -- workspaces look like the same design language.
+  --
+  -- Deliberately NOT behind `if is_linux`. This file is stowed on both platforms
+  -- (bootstrap.sh's ALL_PKGS), and both run window_background_opacity = 0.80 — macOS
+  -- frosting it with macos_window_background_blur, Hyprland with decoration.blur. Same
+  -- problem, same fix, so the tabs should look identical on the Mac and the G14.
+  local bg_active = 'rgba(110, 235, 145, 0.14)'   -- mint wash, matches waybar .active
+  local fg_active = '#6EEB91'                     -- soft glowing sage (bright, not neon)
+
+  local bg_inactive = 'rgba(255, 255, 255, 0.06)' -- barely-there frosted chip
+  local fg_inactive = '#85998C'                   -- legible but muted sage-grey
   
   local transparent = 'rgba(0, 0, 0, 0)' -- Pure window transparency
 

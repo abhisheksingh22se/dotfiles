@@ -158,6 +158,7 @@ than guessed.
 it. Secrets don't belong in a synced dotfiles repo; `.gitignore` has a small deny-list
 (`.env`, `*.pem`, `id_rsa*`, `.netrc`) as a backstop, not an invitation.
 
-Wallpapers aren't here either. `hyprpaper.conf` points at `~/Pictures/wallpapers/current.png`,
-which `bootstrap.sh` creates the directory for but does not populate — binaries don't belong in
-a config repo, and the file is one `cp` away.
+Wallpapers aren't here either. `hyprpaper.conf` points at `~/Wallpaper/current.png`, and
+`bootstrap.sh` creates `~/Wallpaper` but does not populate it — binaries don't belong in a
+config repo, and the file is one `cp` away. If you pick wallpapers through waypaper, point it
+at the same folder; it rewrites `hyprpaper.conf` on every pick.

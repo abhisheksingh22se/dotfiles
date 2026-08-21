@@ -14,21 +14,23 @@
   "position": "top",
   "spacing": 0,
 
-  // 40 = the 32px bar + sketchybar's 8px y_offset, and NOT `height: 32` with
-  // `margin-top: 8`.
+  // The surface height must equal the capsules' full visual footprint, top margin
+  // included — never `height: 28` plus a `margin-top` on the window. waybar derives
+  // its exclusive zone from the layer surface's height, so a top margin pushes the
+  // bar down into space nothing reserved and windows tile *under* it.
   //
-  // The margin version is what made the bar sit on top of windows: waybar's exclusive
-  // zone is derived from the layer surface's height, so a top margin pushes the bar
-  // down 8px into space nothing reserved. Windows tile from y=32 while the bar is
-  // drawn from y=8 to y=40 — an 8px overlap along the bottom edge of the bar.
+  // 36 = style.css's 8px top margin + 1px border + 26px capsule + 1px border + 0px
+  // bottom margin. The bottom margin is deliberately 0: it makes the capsule's lower
+  // edge flush with the bottom of the exclusive zone, so hyprland.lua's gaps_out.top
+  // is the entire gap between the bar and the window below it — set to 5, you get 5.
+  // With the old 3px bottom margin the two stacked and a lone window (WezTerm on
+  // workspace 1) ended up ~3px under the capsule, which looked like an overlap.
   //
-  // Making the surface a full 40px tall means the reserved zone always equals the
-  // visual footprint. The 8px of empty space at the top is produced in style.css
-  // instead, by the capsules' top margin, where it costs nothing.
-  // Verify with `hyprctl layers | grep waybar` — the surface should measure 40 tall.
+  // Change any of those five numbers and this one moves with them. Verify with
+  // `hyprctl layers | grep -A2 waybar` — the surface should measure 36 tall.
   // `height` is a minimum, not a cap: if a font in style.css's stack is missing and
   // GTK substitutes one with taller metrics, the bar grows past it and eats screen.
-  "height": 42,
+  "height": 36,
   "margin-left": 5,
   "margin-right": 5,
 
@@ -53,30 +55,58 @@
   "hyprland/workspaces": {
     "format": "{name} {windows}",
     "format-window-separator": " ",
-    "window-rewrite-default": "",
+    // Every glyph below is a Material Design Icon (U+F0001-U+F1AF0). That is not a
+    // style preference — it is the fix for "some apps get an icon and some don't".
+    //
+    // This map used to mix MDI codepoints with older Nerd Font Private Use Area ones
+    // (U+E000-U+F8FF): a terminal glyph for WezTerm, a Firefox glyph for Brave, and
+    // so on. Every PUA character in this file was silently stripped to an empty
+    // string somewhere in its edit history, while the MDI ones survived — which is
+    // exactly the pattern you saw. VS Code, Zen, Antigravity and Obsidian kept their
+    // icons because they were MDI; WezTerm, kitty, Brave, Spotify, Thunar, mpv and
+    // Discord lost theirs because they were PUA.
+    //
+    // So: MDI only, everywhere in this file. If an icon ever goes blank again, check
+    // for an empty string here before suspecting the font.
+    "window-rewrite-default": "󰖯",
     "window-rewrite": {
-      "class<org.wezfurlong.wezterm>": "",
-      "class<wezterm>": "",
-      "class<kitty>": "",
-      "class<dev.warp.Warp>": "",
+      "class<org.wezfurlong.wezterm>": "󰆍",
+      "class<wezterm>": "󰆍",
+      "class<kitty>": "󰄛",
+      "class<foot>": "󰆍",
+      "class<Alacritty>": "󰆍",
+      "class<dev.warp.Warp>": "󰞷",
       "class<Code>": "󰨞",
       "class<code-oss>": "󰨞",
       "class<VSCodium>": "󰨞",
       "class<Antigravity>": "󱚝",
-      "class<zen>": "󰈹",
-      "class<zen-browser>": "󰈹",
+
+      // Zen is a Firefox fork, so it used to borrow the Firefox flame and the two were
+      // indistinguishable in the bar. Nerd Fonts ships no Zen mark; a leaf is the
+      // closest thing to its identity and, more importantly, is not a flame. Swap it
+      // for any MDI glyph you prefer — just keep it different from firefox below.
+      "class<zen>": "󰌪",
+      "class<zen-alpha>": "󰌪",
+      "class<zen-twilight>": "󰌪",
+      "class<zen-browser>": "󰌪",
       "class<firefox>": "󰈹",
-      "class<Brave-browser>": "",
-      "class<brave-browser>": "",
-      "class<Spotify>": "",
+      "class<Brave-browser>": "󰒘",
+      "class<brave-browser>": "󰒘",
+      "class<chromium>": "󰖟",
+
+      "class<Spotify>": "󰓇",
+      "class<spotify>": "󰓇",
       "class<.*youtube_music.*>": "󰗃",
       "class<brave-.*-Default>": "󰗃",
-      "class<thunar>": "",
-      "class<Thunar>": "",
-      "class<mpv>": "",
-      "class<discord>": "",
+      "class<thunar>": "󰉋",
+      "class<Thunar>": "󰉋",
+      "class<nautilus>": "󰉋",
+      "class<mpv>": "󰐊",
+      "class<discord>": "󰙯",
       "class<obsidian>": "󱓧",
-      "class<org.pulseaudio.pavucontrol>": "",
+      "class<[Ww]aypaper>": "󰋩",
+      "class<org.pulseaudio.pavucontrol>": "󰕾",
+      "class<pavucontrol>": "󰕾",
       "class<rog-control-center>": "󰢮"
     },
     "all-outputs": false,
@@ -96,7 +126,7 @@
   },
 
   "custom/chevron": {
-    "format": "",
+    "format": "󰅂",
     "tooltip": false,
     // sketchybar's chevron click_script was `aerospace layout floating tiling`
     "on-click": "hyprctl dispatch togglefloating"
@@ -135,14 +165,14 @@
     "dynamic-len": 30,
     "interval": 1,
     "player-icons": {
-      "default": "",
-      "mpv": "",
+      "default": "󰝚",
+      "mpv": "󰐊",
       "firefox": "󰈹",
-      "brave": "",
-      "chromium": "",
-      "spotify": ""
+      "brave": "󰒘",
+      "chromium": "󰖟",
+      "spotify": "󰓇"
     },
-    "status-icons": { "paused": "" },
+    "status-icons": { "paused": "󰏤" },
     "ignored-players": ["kdeconnect"],
     "on-click": "playerctl play-pause",
     "on-click-right": "playerctl next",
@@ -170,7 +200,11 @@
   },
 
   "network": {
-    "format-wifi": "",
+    // Blank until now, and so was every pulseaudio icon below it. Two empty labels
+    // sitting between the GPU text and the battery left ~28px of bare padding inside
+    // the right capsule, which is the "vague separator before the battery" — not a
+    // separator at all, just the hole where the wifi and volume glyphs should be.
+    "format-wifi": "󰤨",
     "format-ethernet": "󰈀",
     "format-linked": "󰈀",
     "format-disconnected": "󰤭",
@@ -186,7 +220,7 @@
     "format": "{icon}",
     "format-muted": "󰝟",
     "format-bluetooth": "{icon}󰂯",
-    "format-icons": { "headphone": "", "headset": "", "default": ["", "", ""] },
+    "format-icons": { "headphone": "󰋋", "headset": "󰋎", "default": ["󰕿", "󰖀", "󰕾"] },
     "tooltip-format": "{desc}  {volume}%",
     "on-click": "pavucontrol",
     "on-click-right": "swayosd-client --output-volume mute-toggle",
@@ -197,9 +231,14 @@
   // Glyphs and thresholds match plugins/battery.sh exactly.
   "battery": {
     "states": { "warning": 20, "critical": 10 },
-    "format": "{icon} {capacity}%",
-    "format-charging": "󰂄 {capacity}%",
-    "format-plugged": "󰂄 {capacity}%",
+    // The icon is pinned to Hack Nerd Font inline, so the *label* can be styled as
+    // ordinary text in style.css. Before this the whole module was Nerd Font at 12px,
+    // which made "85%" visibly smaller than the clock and the window title next to it
+    // — Nerd Fonts render a given px size smaller than Inter does at the same size.
+    // Now the glyph keeps its font and the percentage inherits the bar's 13px Inter.
+    "format": "<span font_family='Hack Nerd Font'>{icon}</span> {capacity}%",
+    "format-charging": "<span font_family='Hack Nerd Font'>󰂄</span> {capacity}%",
+    "format-plugged": "<span font_family='Hack Nerd Font'>󰂄</span> {capacity}%",
     "format-icons": ["󰂃", "󰁼", "󰁾", "󰂀", "󰁹"],
     "interval": 30,
     "tooltip-format": "{timeTo}  ({power}W)"

@@ -33,7 +33,7 @@
    height is already accounted for.
 
    Noto Sans and DejaVu Sans are the fallbacks because they have normal metrics and
-   one of them is on any Arch install. If the bar measures taller than 42px in
+   one of them is on any Arch install. If the bar measures taller than 36px in
    `hyprctl layers`, a font in this chain is missing and something with worse metrics
    is being substituted — check with `fc-list | grep -i inter`. */
 * {
@@ -64,12 +64,16 @@ window#waybar {
 window#waybar.hidden { opacity: 0; }
 
 /* ── The glass capsule ────────────────────────────────────────────────────────────
-   sketchybar's `--add bracket`. 26px tall inside a 32px bar leaves 3px above and
-   below, which is exactly the inset the macOS bar has. */
-/* The bar surface is 42px tall (see config.jsonc for why it isn't 32 + an 8px layer
-   margin). 11px top margin + 1px border + 26px capsule + 1px border + 3px bottom
-   margin = 42, which puts the capsule in the same place on screen the macOS bar sits,
-   with the whole strip reserved.
+   sketchybar's `--add bracket`: a 26px-tall pill, 10px corners, 1px hairline border. */
+/* The bar surface is 36px tall (see config.jsonc for why it isn't 28 + a layer
+   margin). 8px top margin + 1px border + 26px capsule + 1px border + 0px bottom
+   margin = 36 — sketchybar's y_offset=8 above the capsule, and nothing below it.
+
+   The zero bottom margin is what fixes the bar-over-window overlap. Anything > 0 there
+   is padding inside the exclusive zone that hyprland.lua's gaps_out.top then stacks
+   on top of, so the two disagree about where the gap starts; with 0, the capsule's
+   bottom border *is* the bottom of the reserved strip and gaps_out.top = 5 is the
+   whole visible gap.
 
    The borders are not optional in that sum: GTK's min-height sizes the *content* box,
    so border and margin are added on top of the 26. Change any of the four numbers
@@ -84,7 +88,7 @@ window#waybar.hidden { opacity: 0; }
   border: 1px solid @glassBorder;
   border-radius: 10px;
   min-height: 26px;
-  margin: 11px 0px 3px 0px;
+  margin: 8px 0px 0px 0px;
   padding: 0px 2px;
 }
 
@@ -98,7 +102,7 @@ window#waybar.hidden { opacity: 0; }
    side did this with `drawing=off` on the media items. */
 #media {
   padding: 0px;
-  margin: 11px 0px 3px 0px;
+  margin: 8px 0px 0px 0px;
 }
 #mpris {
   padding: 0px 10px;
@@ -181,17 +185,31 @@ window#waybar.hidden { opacity: 0; }
    misses and Pango falls through to Noto Color Emoji, whose bitmap metrics inflate
    the label and grow the whole bar. This chain stops that. */
 #network,
-#pulseaudio,
-#battery {
+#pulseaudio {
   font-family: "Hack Nerd Font", "Symbols Nerd Font Mono", monospace;
-  font-size: 12px;
+  font-size: 13px;
   color: @text;
   padding: 0px 7px;
 }
 
+/* Battery is the one module in this group that shows *text*, not just a glyph, so it
+   is styled as text: Inter at the bar's 13px, exactly like the clock and the window
+   title. The glyph inside it keeps Hack Nerd Font via a pango font_family span in the
+   module's format string (config.jsonc) rather than via this rule.
+
+   Styling the whole module as Nerd Font — which is what it did before — is what made
+   "85%" read a size smaller than every other label in the bar. Nerd Font's digits are
+   noticeably shorter than Inter's at the same px value, so matching font-size across
+   the two does not match apparent size; only using Inter for the digits does. */
+#battery {
+  font-family: "Inter", "SF Pro Display", "Noto Sans", "DejaVu Sans", sans-serif;
+  font-size: 13px;
+  color: @text;
+}
+
 #custom-gpu {
   font-family: "Inter", "Noto Sans", "DejaVu Sans", sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   color: @muted;
   padding: 0px 8px 0px 10px;
 }
@@ -199,7 +217,7 @@ window#waybar.hidden { opacity: 0; }
 #network.disconnected { color: @crit; }
 #pulseaudio.muted     { color: @muted; }
 
-#battery { padding: 0px 10px 0px 7px; }
+#battery { padding: 0px 10px 0px 6px; }
 #battery.charging, #battery.plugged { color: @accent; }
 #battery.warning:not(.charging)     { color: @warn; }
 #battery.critical:not(.charging) {
@@ -211,6 +229,17 @@ window#waybar.hidden { opacity: 0; }
   to { color: @textBright; }
 }
 
+/* GTK will happily draw a separator between the children of a box if a theme asks it
+   to, and inside a glass capsule that shows up as a faint vertical smudge between two
+   modules. Nothing in this file requests one, but the system GTK theme is not under
+   this repo's control, so deny it outright. */
+#waybar separator,
+#waybar box separator {
+  background-color: transparent;
+  min-width: 0px;
+  min-height: 0px;
+}
+
 /* ── Clock ────────────────────────────────────────────────────────────────────── */
 #clock {
   color: @textBright;
@@ -220,7 +249,7 @@ window#waybar.hidden { opacity: 0; }
 /* ── Tray ─────────────────────────────────────────────────────────────────────── */
 #tray {
   padding: 0px 8px;
-  margin: 11px 0px 3px 0px;
+  margin: 8px 0px 0px 0px;
 }
 #tray > .passive { -gtk-icon-effect: dim; }
 #tray > .needs-attention { -gtk-icon-effect: highlight; }

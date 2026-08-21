@@ -223,13 +223,23 @@ end)
 
 hl.config({
     general = {
-        -- aerospace.toml: inner 5 / outer 5, with top 10. Waybar reserves its own
-        -- strip via exclusive zone, so the extra top gap is just breathing room.
+        -- Target: a 5px gutter everywhere — screen edges, between windows, and
+        -- between the bar and the topmost window.
         --
-        -- The conf-file form ("10 5 5 5") is not accepted here: the Lua layer types
+        -- gaps_in is per-window-edge, so two adjacent windows each contribute one:
+        -- the gap you actually see between them is gaps_in * 2. 2 -> ~4px, which is
+        -- the closest an integer gets to 5 without the seam reading as 10.
+        --
+        -- gaps_out.top stacks on top of waybar's exclusive zone, not on the screen
+        -- edge. waybar/style.css ends its capsule flush with the bottom of that zone
+        -- (bottom margin 0), so top = 5 is exactly 5px of visible space between the
+        -- capsule and the window under it. If you re-introduce a bottom margin in
+        -- style.css, subtract it here or the gap grows by that much.
+        --
+        -- The conf-file form ("5 5 5 5") is not accepted here: the Lua layer types
         -- this as a css_gap, which wants either a plain integer or this table.
-        gaps_in  = 5,
-        gaps_out = { top = 10, right = 5, bottom = 5, left = 5 },
+        gaps_in  = 2,
+        gaps_out = { top = 5, right = 5, bottom = 5, left = 5 },
 
         -- `borders` on macOS drew 4px outside the window; Hyprland draws inside, so
         -- 3px reads at about the same weight.
@@ -246,8 +256,12 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 10,   -- sketchybar capsules + macOS windows both use 10
-        rounding_power = 2,
+        -- macOS window corners are a touch rounder than the 10px sketchybar capsule,
+        -- and they are squircles rather than quarter-circles. rounding_power > 2
+        -- flattens the middle of the arc, which is what reads as "Mac" rather than
+        -- "rounded rectangle"; 2 is a plain circular corner.
+        rounding       = 12,
+        rounding_power = 2.2,
 
         active_opacity   = 1.0,
         inactive_opacity = 0.97,
@@ -626,19 +640,38 @@ hl.window_rule({
 })
 
 -- ── Floating dialogs ──
+-- Sizes are percentages, not pixels, and that is the whole point. A literal
+-- "900 600" is 56% x 67% of this panel's 1600x900 *logical* space (2560x1440 at
+-- scale 1.6, see the monitor block above) — a settings dialog opening two-thirds of
+-- the screen wide is what "the window is huge" was. Percentages stay proportionate
+-- if the scale or the panel ever changes.
+--
+-- Anything not matched here tiles, and a lone tiled window fills the workspace — so
+-- an unlisted utility (waypaper, nwg-look, a GTK "About" box) looks enormous for a
+-- different reason. Add new ones to this list rather than to the picker list below.
 hl.window_rule({
     name  = "float-dialogs",
-    match = { class = "^(pavucontrol|blueman-manager|nm-connection-editor|rog-control-center|org\\.pulseaudio\\.pavucontrol|xdg-desktop-portal-gtk|Thunar)$" },
+    match = { class = "^(pavucontrol|blueman-manager|nm-connection-editor|rog-control-center|org\\.pulseaudio\\.pavucontrol|xdg-desktop-portal-gtk|Thunar|thunar|nm-applet|blueman-applet|file-roller|org\\.gnome\\.FileRoller|Gpick|qalculate-gtk)$" },
     float = true,
-    size  = "900 600",
+    size  = "45% 55%",
+    center = true,
+})
+
+-- Wallpaper and theme pickers are grids of thumbnails; they need width more than the
+-- 45% a settings dialog gets, but still nothing close to fullscreen.
+hl.window_rule({
+    name  = "float-pickers-wide",
+    match = { class = "^(waypaper|Waypaper|nwg-look|nwg-displays)$" },
+    float = true,
+    size  = "60% 65%",
     center = true,
 })
 
 hl.window_rule({
     name  = "float-picker-dialogs",
-    match = { title = "^(Open File|Open Folder|Save File|Save As|Choose Files|File Upload)$" },
+    match = { title = "^(Open File|Open Folder|Save File|Save As|Choose Files|File Upload|Open|Save)$" },
     float = true,
-    size  = "900 600",
+    size  = "55% 60%",
     center = true,
 })
 
@@ -671,20 +704,18 @@ hl.layer_rule({ name = "blur-logout",    match = { namespace = "^wlogout$" },  b
 -- WORKSPACE RULES
 -- ═════════════════════════════════════════════
 
--- "No gaps when only" — a single window on a workspace goes edge to edge, matching
--- how a maximized macOS window looks.
-hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
-hl.workspace_rule({ workspace = "f[1]",   gaps_out = 0, gaps_in = 0 })
-
-hl.window_rule({
-    name  = "no-gaps-wtv1",
-    match = { float = false, workspace = "w[tv1]" },
-    border_size = 0,
-    rounding    = 0,
-})
-hl.window_rule({
-    name  = "no-gaps-f1",
-    match = { float = false, workspace = "f[1]" },
-    border_size = 0,
-    rounding    = 0,
-})
+-- There is deliberately no "no gaps when only" rule here any more.
+--
+-- The usual pair — workspace_rule gaps_out = 0 plus a window_rule with rounding = 0
+-- for w[tv1]/f[1] — made a lone window on a workspace go edge to edge with square
+-- corners. Two visible consequences, both of which read as bugs rather than design:
+--
+--   * gaps_out = 0 puts the window's top edge flush against the bottom of waybar's
+--     exclusive zone, ~3px under the capsule, so the bar looked like it was sitting
+--     on the window. It showed up "only in WezTerm" because WezTerm is routed to
+--     workspace 1 and is usually the single window there — the rule only fires when
+--     a workspace holds exactly one tiled window.
+--   * rounding = 0 squared off exactly the window you look at most.
+--
+-- Dropping both means every window keeps the 5px gutter and the 12px corner. Real
+-- fullscreen (SUPER+F) still goes edge to edge; that path ignores gaps entirely.
