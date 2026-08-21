@@ -30,6 +30,22 @@ local c = {
 
 
 -- ─────────────────────────────────────────────
+-- Session: Ambxst, or bare Hyprland
+-- ─────────────────────────────────────────────
+-- Two ways to start the desktop, chosen at launch time from the TTY (there is no
+-- display manager on this box — see the aliases in zsh/.zshrc):
+--
+--   hypr         bare Hyprland. No shell, no bar. The fallback for when an Ambxst
+--                update breaks something, and for anything that wants a clean screen.
+--   hypr-ambxst  Hyprland + Ambxst: bar, dock, and the notch that stands in for the
+--                MacBook's dynamic island.
+--
+-- Everything below that differs between the two branches on this one boolean, so
+-- there is exactly one thing to grep for when a session looks wrong.
+local ambxst_session = os.getenv("AMBXST_SESSION") == "1"
+
+
+-- ─────────────────────────────────────────────
 -- Programs
 -- ─────────────────────────────────────────────
 
@@ -202,10 +218,40 @@ hl.on("hyprland.start", function()
     -- before the rest.
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
 
-    -- hl.exec_cmd("waybar")                                   -- SketchyBar's counterpart
+    -- Name the icon theme. gtk/.config/gtk-*/settings.ini covers GTK apps and
+    -- gtk/.config/qt6ct/qt6ct.conf covers Qt, but Quickshell asks the appearance
+    -- portal, which reads gsettings — so all three have to agree or Ambxst's
+    -- workspace pills come up blank. Installing papirus-icon-theme is not enough on
+    -- its own; with nothing *named*, XDG lookups fall through to hicolor and even
+    -- "image-missing" fails to resolve.
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
+
+    -- Waybar is retired: Ambxst's bar replaces it, and the sketchybar port it was
+    -- based on now lives on in the Frost Glass preset instead. waybar/ is still in
+    -- the repo but is no longer stowed (see bootstrap.sh's LINUX_ONLY_PKGS), so a
+    -- bare `hypr` session deliberately has no bar at all.
+    if ambxst_session then
+        hl.exec_cmd("ambxst")                               -- bar + dock + notch
+    end
+
     hl.exec_cmd("hyprpaper")                                -- wallpaper
     hl.exec_cmd("mako")                                     -- notifications
-    hl.exec_cmd("hypridle")                                 -- idle -> lock -> dpms
+    -- Idle/lock, and only ever one of them.
+    --
+    -- Ambxst ships its own idle stack in ambxst/.config/ambxst/config/system.json,
+    -- with a ladder identical in shape to hypridle.conf's (150 dim / 300 lock /
+    -- 330 screen off / 1800 suspend) but driven by `ambxst ...` and locking with
+    -- Ambxst's own lockscreen rather than hyprlock. Running both means two daemons
+    -- arming the same timers, and at 300s both call `loginctl lock-session` — two
+    -- lockers racing for the same session.
+    --
+    -- So hypridle is the bare session's idle handler and Ambxst is its own. The one
+    -- thing lost under Ambxst is the G14 keyboard-backlight listener, which hypridle
+    -- has and system.json has no equivalent for.
+    if not ambxst_session then
+        hl.exec_cmd("hypridle")                             -- idle -> hyprlock -> dpms
+    end
     hl.exec_cmd("systemctl --user start hyprpolkitagent")   -- GUI sudo prompts
     hl.exec_cmd("swayosd-server")                           -- volume/brightness OSD
     hl.exec_cmd("nm-applet --indicator")                    -- tray: wifi
@@ -221,72 +267,25 @@ end)
 -- Look and feel
 -- ─────────────────────────────────────────────
 
+-- Settings that hold in BOTH sessions. Nothing here is something Ambxst emits, so
+-- there is no one to fight with: `hyprctl keyword` never touches rounding_power or
+-- the opacity pair, and layout/resize/tearing are behaviour rather than decoration.
 hl.config({
     general = {
-        -- Target: a 5px gutter everywhere — screen edges, between windows, and
-        -- between the bar and the topmost window.
-        --
-        -- gaps_in is per-window-edge, so two adjacent windows each contribute one:
-        -- the gap you actually see between them is gaps_in * 2. 2 -> ~4px, which is
-        -- the closest an integer gets to 5 without the seam reading as 10.
-        --
-        -- gaps_out.top stacks on top of waybar's exclusive zone, not on the screen
-        -- edge. waybar/style.css ends its capsule flush with the bottom of that zone
-        -- (bottom margin 0), so top = 5 is exactly 5px of visible space between the
-        -- capsule and the window under it. If you re-introduce a bottom margin in
-        -- style.css, subtract it here or the gap grows by that much.
-        --
-        -- The conf-file form ("5 5 5 5") is not accepted here: the Lua layer types
-        -- this as a css_gap, which wants either a plain integer or this table.
-        gaps_in  = 2,
-        gaps_out = { top = 5, right = 5, bottom = 5, left = 5 },
-
-        -- `borders` on macOS drew 4px outside the window; Hyprland draws inside, so
-        -- 3px reads at about the same weight.
-        border_size = 3,
-
-        col = {
-            active_border   = { colors = { c.border_active, c.border_accent }, angle = 45 },
-            inactive_border = c.border_inactive,
-        },
-
         resize_on_border = true,
         allow_tearing    = false,
         layout           = "dwindle",
     },
 
     decoration = {
-        -- macOS window corners are a touch rounder than the 10px sketchybar capsule,
-        -- and they are squircles rather than quarter-circles. rounding_power > 2
-        -- flattens the middle of the arc, which is what reads as "Mac" rather than
-        -- "rounded rectangle"; 2 is a plain circular corner.
-        rounding       = 12,
+        -- macOS window corners are squircles rather than quarter-circles.
+        -- rounding_power > 2 flattens the middle of the arc, which is what reads as
+        -- "Mac" rather than "rounded rectangle"; 2 is a plain circular corner. The
+        -- radius itself is set per-session below / by Ambxst.
         rounding_power = 2.2,
 
         active_opacity   = 1.0,
         inactive_opacity = 0.97,
-
-        shadow = {
-            enabled      = true,
-            range        = 18,
-            render_power = 3,
-            color        = c.shadow,
-        },
-
-        -- This is what makes the whole thing read as glass: wezterm sits at 0.80
-        -- opacity and Hyprland blurs whatever is behind it, which is the Wayland
-        -- equivalent of macos_window_background_blur = 38.
-        blur = {
-            enabled     = true,
-            size        = 8,
-            passes      = 3,
-            vibrancy    = 0.1696,
-            noise       = 0.008,
-            brightness  = 0.85,
-            contrast    = 1.05,
-            popups      = true,
-            special     = true,
-        },
     },
 
     animations = { enabled = true },
@@ -354,6 +353,99 @@ hl.config({
         force_zero_scaling = true,
     },
 })
+
+
+-- ─────────────────────────────────────────────
+-- Decoration: whoever owns the session owns these
+-- ─────────────────────────────────────────────
+-- Ambxst's CompositorConfig applies `hyprctl keyword` at runtime for exactly this
+-- list: general:{border_size, gaps_in, gaps_out, col.active_border,
+-- col.inactive_border, layout}, decoration:rounding, and the whole
+-- decoration:shadow:* and decoration:blur:* trees. Because those are live keywords
+-- issued after the config is parsed, Ambxst wins whatever is written here — setting
+-- them in both places would not be a conflict so much as dead code in this file.
+--
+-- So under Ambxst this block does not run at all, and
+-- ambxst/.config/ambxst/presets/Frost Glass/compositor.json is the only place these
+-- values exist. The bare `hypr` session has no Ambxst to inherit from, so it keeps
+-- them here — without this branch, bare Hyprland would fall back to the stock
+-- defaults (square corners, 20px outer gaps) and look nothing like the Mac.
+--
+-- Keep the two in step when you change one. The values below are the Frost Glass
+-- preset's, spelled in Hyprland's own vocabulary.
+if not ambxst_session then
+    hl.config({
+        general = {
+            -- gaps_in is per window edge, so two adjacent windows each contribute
+            -- one: the seam you actually see between them is gaps_in * 2. 2 -> ~4px,
+            -- the closest an integer gets to 5 without the seam reading as 10.
+            --
+            -- The conf-file form ("5 5 5 5") is not accepted here: the Lua layer
+            -- types this as a css_gap, which wants an integer or this table.
+            gaps_in  = 2,
+            gaps_out = { top = 5, right = 5, bottom = 5, left = 5 },
+
+            -- `borders` on macOS drew 4px outside the window; Hyprland draws inside,
+            -- so 3px reads at about the same weight.
+            border_size = 3,
+
+            col = {
+                active_border   = { colors = { c.border_active, c.border_accent }, angle = 45 },
+                inactive_border = c.border_inactive,
+            },
+        },
+
+        decoration = {
+            rounding = 12,
+
+            shadow = {
+                enabled      = true,
+                range        = 18,
+                render_power = 3,
+                color        = c.shadow,
+            },
+
+            -- This is what makes the whole thing read as glass: wezterm sits at 0.80
+            -- opacity and Hyprland blurs whatever is behind it, the Wayland
+            -- equivalent of macos_window_background_blur = 38.
+            blur = {
+                enabled     = true,
+                size        = 8,
+                passes      = 3,
+                vibrancy    = 0.1696,
+                noise       = 0.008,
+                brightness  = 0.85,
+                contrast    = 1.05,
+                popups      = true,
+                special     = true,
+            },
+        },
+    })
+end
+
+
+-- ─────────────────────────────────────────────
+-- Ambxst
+-- ─────────────────────────────────────────────
+-- `ambxst install hyprland` detects a Lua config and appends exactly this loadfile
+-- line. It is written out by hand instead so the call is guarded: loadfile returns
+-- nil plus a message for a missing or unparsable file rather than raising, and an
+-- unguarded call would take the entire config down with it on any boot where Ambxst
+-- is half-installed — including the `hypr` session that exists to be the fallback.
+--
+-- The file carries Ambxst's own keybinds and layer rules. It is deliberately not
+-- loaded in a bare session: its binds all shell out to `ambxst ...`, which is not
+-- running there.
+if ambxst_session then
+    local ambxst_hypr = os.getenv("HOME") .. "/.local/share/ambxst/hyprland.lua"
+    local chunk, err = loadfile(ambxst_hypr)
+    if chunk then
+        chunk()
+    else
+        hl.print("hyprland.lua: Ambxst present but " .. ambxst_hypr ..
+                 " did not load (" .. tostring(err) .. ") — run `ambxst install hyprland`")
+    end
+end
 
 
 -- ─────────────────────────────────────────────

@@ -13,8 +13,7 @@
     "margin": 4,
     "pinnedOnStartup": false,
     "position": "bottom",
-    "screenList": [
-    ],
+    "screenList": [],
     "showOverviewButton": true,
     "showPinButton": true,
     "showRunningIndicators": true,

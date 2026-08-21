@@ -36,7 +36,7 @@ echo "detected OS: $os"
 # yet on a fresh machine), so this stays plain arrays for portability.
 ALL_PKGS=(wezterm yt-dlp zsh git p10k)
 MACOS_ONLY_PKGS=(aerospace sketchybar)      # no Linux/Windows port exists or ever will
-LINUX_ONLY_PKGS=(hypr waybar rofi mako)     # Wayland desktop; meaningless on macOS
+LINUX_ONLY_PKGS=(hypr ambxst rofi mako gtk) # Wayland desktop; meaningless on macOS
 
 if ! command -v stow >/dev/null 2>&1; then
   echo "stow not found, installing..."

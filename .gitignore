@@ -13,3 +13,11 @@ target/
 *.pem
 id_rsa*
 .netrc
+
+# Ambxst holds an API key for its AI sidebar (defaultModel is gemini-2.0-flash, so a
+# Google AI Studio key). Its PresetsService already excludes ai.json from presets for
+# this reason; this is the repo-level backstop so a key never lands in a commit.
+# weather.json is user data but not secret, so it is deliberately NOT ignored.
+ambxst/.config/ambxst/config/ai.json
+ambxst/.config/ambxst/**/keys.json
+ambxst/.config/ambxst/**/secrets.json

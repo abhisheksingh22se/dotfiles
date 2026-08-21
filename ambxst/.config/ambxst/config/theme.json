@@ -1,11 +1,11 @@
 {
-    "oledMode": false,
+    "oledMode": true,
     "lightMode": false,
-    "roundness": 16,
-    "font": "Roboto Condensed",
-    "fontSize": 14,
-    "monoFont": "Iosevka Nerd Font Mono",
-    "monoFontSize": 14,
+    "roundness": 10,
+    "font": "Inter",
+    "fontSize": 13,
+    "monoFont": "Hack Nerd Font Mono",
+    "monoFontSize": 13,
     "tintIcons": false,
     "enableCorners": true,
     "animDuration": 300,
@@ -34,10 +34,10 @@
         "halftoneBackgroundColor": "background",
         "border": [
             "surfaceBright",
-            0
+            1
         ],
         "itemColor": "overBackground",
-        "opacity": 1
+        "opacity": 0.45
     },
     "srPopup": {
         "label": "Popup",
@@ -59,10 +59,10 @@
         "halftoneBackgroundColor": "background",
         "border": [
             "surfaceBright",
-            2
+            1
         ],
         "itemColor": "overBackground",
-        "opacity": 1
+        "opacity": 0.68
     },
     "srInternalBg": {
         "label": "Internal BG",
@@ -87,7 +87,7 @@
             0
         ],
         "itemColor": "overBackground",
-        "opacity": 1
+        "opacity": 0.68
     },
     "srBarBg": {
         "label": "Bar BG",
@@ -112,7 +112,7 @@
             0
         ],
         "itemColor": "overBackground",
-        "opacity": 0
+        "opacity": 0.0
     },
     "srPane": {
         "label": "Pane",
@@ -134,16 +134,16 @@
         "halftoneBackgroundColor": "surface",
         "border": [
             "surfaceBright",
-            0
+            1
         ],
         "itemColor": "overBackground",
-        "opacity": 1
+        "opacity": 0.68
     },
     "srCommon": {
         "label": "Common",
         "gradient": [
             [
-                "surface",
+                "background",
                 0
             ]
         ],
@@ -159,10 +159,10 @@
         "halftoneBackgroundColor": "surface",
         "border": [
             "surfaceBright",
-            0
+            1
         ],
         "itemColor": "overBackground",
-        "opacity": 1
+        "opacity": 0.45
     },
     "srFocus": {
         "label": "Focus",
@@ -184,10 +184,10 @@
         "halftoneBackgroundColor": "surfaceBright",
         "border": [
             "surfaceBright",
-            0
+            1
         ],
         "itemColor": "overBackground",
-        "opacity": 1
+        "opacity": 0.22
     },
     "srPrimary": {
         "label": "Primary",

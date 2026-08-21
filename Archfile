@@ -15,7 +15,18 @@
 # Compositor and desktop shell   (macOS: aerospace, sketchybar, borders, raycast)
 # ─────────────────────────────────────────────────────────────────────────────
 pac hyprland                  # <- aerospace
-pac waybar                    # <- sketchybar
+
+# Ambxst is the desktop shell: bar, dock, and the notch that stands in for the
+# MacBook's dynamic island. It is a Quickshell config, not a distro package —
+# install it with `curl -L get.axeni.de/ambxst | sh`, then `ambxst install hyprland`.
+# quickshell-git is the runtime it needs; the rest of the line is what its widgets
+# shell out to. See ambxst/ for the Frost Glass preset.
+aur quickshell-git            # <- Ambxst's runtime
+
+# waybar is retired, not deleted. Ambxst's bar replaced it and bootstrap.sh no longer
+# stows waybar/, but the sketchybar port is still in the repo and still the reference
+# the Frost Glass preset's geometry came from. Uncomment to run a waybar session again.
+# pac waybar                  # <- sketchybar
 pac hyprlock
 pac hypridle
 pac hyprpaper
@@ -53,7 +64,7 @@ pac inter-font                # stand-in for SF Pro, which is macOS-only
 pac noto-fonts
 pac noto-fonts-emoji
 pac noto-fonts-cjk
-pac papirus-icon-theme        # rofi/waybar app icons
+pac papirus-icon-theme        # rofi/Ambxst app icons
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Terminal and shell            (unchanged from the Brewfile — all cross-platform)
