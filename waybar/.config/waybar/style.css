@@ -33,7 +33,7 @@
    height is already accounted for.
 
    Noto Sans and DejaVu Sans are the fallbacks because they have normal metrics and
-   one of them is on any Arch install. If the bar measures taller than 40px in
+   one of them is on any Arch install. If the bar measures taller than 42px in
    `hyprctl layers`, a font in this chain is missing and something with worse metrics
    is being substituted — check with `fc-list | grep -i inter`. */
 * {
@@ -45,6 +45,12 @@
   min-height: 0;
   /* Waybar draws a 1px text shadow by default that muddies light-on-glass text. */
   text-shadow: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+button, label, image, box, widget {
+  min-height: 0px;
   box-shadow: none;
 }
 
@@ -60,9 +66,15 @@ window#waybar.hidden { opacity: 0; }
 /* ── The glass capsule ────────────────────────────────────────────────────────────
    sketchybar's `--add bracket`. 26px tall inside a 32px bar leaves 3px above and
    below, which is exactly the inset the macOS bar has. */
-/* The bar surface is 40px tall (see config.jsonc for why it isn't 32 + an 8px layer
-   margin). 11px top + 26px capsule + 3px bottom = 40, which puts the capsule in the
-   same place on screen the macOS bar sits, with the whole strip reserved. */
+/* The bar surface is 42px tall (see config.jsonc for why it isn't 32 + an 8px layer
+   margin). 11px top margin + 1px border + 26px capsule + 1px border + 3px bottom
+   margin = 42, which puts the capsule in the same place on screen the macOS bar sits,
+   with the whole strip reserved.
+
+   The borders are not optional in that sum: GTK's min-height sizes the *content* box,
+   so border and margin are added on top of the 26. Change any of the four numbers
+   below and "height" in config.jsonc has to move with them, or waybar overrides it
+   and the exclusive zone stops matching the visual footprint. */
 #spaces,
 #app,
 #media,
@@ -111,8 +123,8 @@ window#waybar.hidden { opacity: 0; }
   border-radius: 8px;
   padding: 0px 8px;
   margin: 0px 1px;
-  font-family: "Hack Nerd Font", monospace;
-  font-size: 13px;
+  font-family: "Hack Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 12px;
   font-weight: bold;
   /* Waybar animates padding on hover unless this is pinned, which makes the whole
      bar jitter as you move across it. */
@@ -150,8 +162,8 @@ window#waybar.hidden { opacity: 0; }
 
 /* ── Chevron + focused app ────────────────────────────────────────────────────── */
 #custom-chevron {
-  font-family: "Hack Nerd Font", monospace;
-  font-size: 13px;
+  font-family: "Hack Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 12px;
   font-weight: bold;
   color: @text;
   padding: 0px 2px 0px 8px;   /* sketchybar: icon.padding_left=6, padding_left=4 */
@@ -163,11 +175,16 @@ window#waybar.hidden { opacity: 0; }
 }
 
 /* ── System group ─────────────────────────────────────────────────────────────── */
+/* "Symbols Nerd Font Mono" is the fallback, not the primary: it only takes over for
+   codepoints Hack Nerd Font lacks. Nerd Fonts moved Material Design Icons to
+   U+F0001-F1AF0 in v3, so on a v2 install every battery/network/app glyph here
+   misses and Pango falls through to Noto Color Emoji, whose bitmap metrics inflate
+   the label and grow the whole bar. This chain stops that. */
 #network,
 #pulseaudio,
-#battery,
-#custom-gpu {
-  font-family: "Hack Nerd Font", monospace;
+#battery {
+  font-family: "Hack Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 12px;
   color: @text;
   padding: 0px 7px;
 }
