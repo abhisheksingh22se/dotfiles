@@ -3,9 +3,9 @@
     "lightMode": false,
     "roundness": 10,
     "font": "Inter",
-    "fontSize": 16,
+    "fontSize": 13,
     "monoFont": "Hack Nerd Font Mono",
-    "monoFontSize": 15,
+    "monoFontSize": 13,
     "tintIcons": false,
     "enableCorners": true,
     "animDuration": 300,
@@ -111,7 +111,7 @@
             "surfaceBright",
             0
         ],
-        "itemColor": "white",
+        "itemColor": "overBackground",
         "opacity": 0.0
     },
     "srPane": {

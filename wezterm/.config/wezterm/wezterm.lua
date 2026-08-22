@@ -93,7 +93,7 @@ end
 -- doing the same job on both OSes through two different mechanisms.
 config.text_background_opacity = 0.90
 
-config.window_decorations = 'RESIZE'
+config.window_decorations = 'NONE'
 
 -- 'none' is not a color WezTerm can parse — it goes through a CSS colour parser that
 -- knows names, #rrggbb and rgba(), and nothing else. An unparsable value here doesn't

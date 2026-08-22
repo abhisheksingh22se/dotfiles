@@ -9,7 +9,7 @@
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" && "$TERM" != "linux" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
@@ -86,13 +86,17 @@ compinit
 # ─────────────────────────────────────────────
 # Prompt — Powerlevel10k
 # ─────────────────────────────────────────────
-_source_first \
-  /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme \
-  /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme \
-  /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+if [[ "$TERM" == "linux" ]]; then
+	PROMPT='[%n@%m]-(%~) %(#.#.$) '
+else
+	_source_first \
+	  /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme \
+	  /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme \
+	  /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+
+	[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+fi
 
 # ─────────────────────────────────────────────
 # History
@@ -182,3 +186,7 @@ fi
 
 unset -f _source_first _path_prepend
 unset is_mac is_linux
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/abhishek/.local/bin:$PATH"

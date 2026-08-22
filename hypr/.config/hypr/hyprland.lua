@@ -90,12 +90,12 @@ local lock        = "hyprlock"
 -- Set to "auto" to go back to detecting the panel from the table below instead — worth
 -- doing if this config ever lands on a different machine.
 
-local PANEL_SCALE = 1.6
+local PANEL_SCALE = 1.333333
 
 -- Fractional scales must divide the panel evenly or Hyprland rejects them and falls
 -- back to 1.0. Both values below are exact: 2560/1.6 = 1600, 1440/1.6 = 900.
 local SCALE_FOR_HEIGHT = {
-    [1440] = 1.6,   -- WQHD panel (this laptop)
+    [1440] = 1.333333,   -- WQHD panel (this laptop)
     [1200] = 1.25,
     [1080] = 1.0,   -- FHD panel: native is already the right density
 }
