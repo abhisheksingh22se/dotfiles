@@ -46,6 +46,13 @@ config.font = wezterm.font('Hack Nerd Font', {
 config.font_size = 13.0
 config.line_height = 1.08
 
+-- Fix for characters looking "half uncompleted" or clipped on external non-Retina monitors
+if is_macos then
+  config.front_end = "WebGpu"
+  config.freetype_load_target = "Light"
+  config.freetype_render_target = "Normal"
+end
+
 -- ─────────────────────────────────────────────
 -- Dark Frosted Hacker Glass
 -- ─────────────────────────────────────────────
