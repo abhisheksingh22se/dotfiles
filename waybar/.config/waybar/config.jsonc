@@ -41,7 +41,7 @@
 
   "modules-left": ["group/spaces", "group/app"],
   "modules-center": [],
-  "modules-right": ["group/media", "group/sys", "clock", "tray"],
+  "modules-right": ["mpris", "group/sys_tray", "group/battery_clock"],
 
   // ── Left: workspace indicators ────────────────────────────────────────────────
   // The macOS side used a Rust plugin to render AeroSpace workspaces with the app
@@ -68,51 +68,44 @@
     //
     // So: MDI only, everywhere in this file. If an icon ever goes blank again, check
     // for an empty string here before suspecting the font.
-    "window-rewrite-default": "󰖯",
+    "window-rewrite-default": "",
     "window-rewrite": {
-      "class<org.wezfurlong.wezterm>": "󰆍",
-      "class<wezterm>": "󰆍",
-      "class<kitty>": "󰄛",
-      "class<foot>": "󰆍",
-      "class<Alacritty>": "󰆍",
-      "class<dev.warp.Warp>": "󰞷",
+      "class<org.wezfurlong.wezterm>": "",
+      "class<wezterm>": "",
+      "class<kitty>": "",
+      "class<foot>": "",
+      "class<Alacritty>": "",
+      "class<dev.warp.Warp>": "",
       "class<Code>": "󰨞",
       "class<code-oss>": "󰨞",
       "class<VSCodium>": "󰨞",
       "class<Antigravity>": "󱚝",
-
-      // Zen is a Firefox fork, so it used to borrow the Firefox flame and the two were
-      // indistinguishable in the bar. Nerd Fonts ships no Zen mark; a leaf is the
-      // closest thing to its identity and, more importantly, is not a flame. Swap it
-      // for any MDI glyph you prefer — just keep it different from firefox below.
-      "class<zen>": "󰌪",
-      "class<zen-alpha>": "󰌪",
-      "class<zen-twilight>": "󰌪",
-      "class<zen-browser>": "󰌪",
-      "class<firefox>": "󰈹",
-      "class<Brave-browser>": "󰒘",
-      "class<brave-browser>": "󰒘",
-      "class<chromium>": "󰖟",
-
-      "class<Spotify>": "󰓇",
-      "class<spotify>": "󰓇",
-      "class<.*youtube_music.*>": "󰗃",
-      "class<brave-.*-Default>": "󰗃",
-      "class<thunar>": "󰉋",
-      "class<Thunar>": "󰉋",
-      "class<nautilus>": "󰉋",
-      "class<mpv>": "󰐊",
-      "class<discord>": "󰙯",
-      "class<obsidian>": "󱓧",
-      "class<[Ww]aypaper>": "󰋩",
-      "class<org.pulseaudio.pavucontrol>": "󰕾",
-      "class<pavucontrol>": "󰕾",
-      "class<rog-control-center>": "󰢮"
+      "class<zen>": "",
+      "class<zen-alpha>": "",
+      "class<zen-twilight>": "",
+      "class<zen-browser>": "",
+      "class<firefox>": "",
+      "class<Brave-browser>": "",
+      "class<brave-browser>": "",
+      "class<chromium>": "",
+      "class<Spotify>": "",
+      "class<spotify>": "",
+      "class<.*youtube_music.*>": "",
+      "class<brave-.*-Default>": "",
+      "class<thunar>": "",
+      "class<Thunar>": "",
+      "class<nautilus>": "",
+      "class<mpv>": "",
+      "class<discord>": "",
+      "class<obsidian>": "",
+      "class<[Ww]aypaper>": "",
+      "class<org.pulseaudio.pavucontrol>": "",
+      "class<pavucontrol>": "",
+      "class<rog-control-center>": ""
     },
     "all-outputs": false,
     "show-special": true,
     "special-visible-only": true,
-    "on-click": "activate",
     "on-scroll-up": "hyprctl dispatch workspace e+1",
     "on-scroll-down": "hyprctl dispatch workspace e-1",
     "sort-by-number": true
@@ -149,18 +142,11 @@
     "tooltip-format": "{title}"
   },
 
-  // ── Right: now playing ────────────────────────────────────────────────────────
-  // Replaces plugins/wnp-daemon/media_daemon.py wholesale. That daemon existed only
-  // because macOS has no MPRIS; on Linux every player publishes to MPRIS already, so
-  // this is a built-in module instead of a Python venv.
-  "group/media": {
-    "orientation": "horizontal",
-    "modules": ["mpris"]
-  },
+
 
   "mpris": {
-    "format": "{player_icon} {dynamic}",
-    "format-paused": "{status_icon} <i>{dynamic}</i>",
+    "format": "<span font_family='Hack Nerd Font'>{player_icon}</span> {dynamic}",
+    "format-paused": "<span font_family='Hack Nerd Font'>{status_icon}</span> <i>{dynamic}</i>",
     "dynamic-order": ["title", "artist"],
     "dynamic-len": 30,
     "interval": 1,
@@ -184,9 +170,14 @@
   // ── Right: system ─────────────────────────────────────────────────────────────
   // sketchybar's right_capsule held clock + battery. Network and volume are added
   // here because macOS put them in the menu bar, which Linux has no equivalent of.
-  "group/sys": {
+  "group/sys_tray": {
     "orientation": "horizontal",
-    "modules": ["custom/gpu", "network", "pulseaudio", "battery"]
+    "modules": ["network", "tray"]
+  },
+
+  "group/battery_clock": {
+    "orientation": "horizontal",
+    "modules": ["battery", "clock"]
   },
 
   // Which GPU mode supergfxctl is in — the one G14-specific thing worth always seeing,

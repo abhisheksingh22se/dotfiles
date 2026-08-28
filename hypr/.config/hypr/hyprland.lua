@@ -22,8 +22,8 @@
 
 local c = {
     -- sketchybar's `borders` colors: active 0x88ffffff, inactive 0x20ffffff
-    border_active   = "rgba(ffffff88)",
-    border_accent   = "rgba(6eeb91cc)",  -- wezterm active-tab foreground
+    border_active   = "rgba(ffffff66)",  -- JankyBorders minimal frosted white
+    border_accent   = "rgba(ffffff66)",  -- JankyBorders minimal frosted white
     border_inactive = "rgba(ffffff20)",
     shadow          = 0xee050806,        -- wezterm background, opaque
 }
@@ -42,7 +42,7 @@ local c = {
 --
 -- Everything below that differs between the two branches on this one boolean, so
 -- there is exactly one thing to grep for when a session looks wrong.
-local ambxst_session = os.getenv("AMBXST_SESSION") == "1"
+local ambxst_session = false
 
 
 -- ─────────────────────────────────────────────
@@ -50,7 +50,7 @@ local ambxst_session = os.getenv("AMBXST_SESSION") == "1"
 -- ─────────────────────────────────────────────
 
 local terminal    = "wezterm"
-local fileManager = "thunar"
+local fileManager = "nautilus"
 local menu        = "rofi -show drun"
 local browser     = "zen-browser"
 local lock        = "hyprlock"
@@ -176,8 +176,9 @@ hl.monitor({
 -- Environment
 -- ─────────────────────────────────────────────
 
-hl.env("XCURSOR_SIZE",             "24")
-hl.env("HYPRCURSOR_SIZE",          "24")
+hl.env("XCURSOR_THEME",            "capitaine-cursors")
+hl.env("XCURSOR_SIZE",             "32")
+hl.env("HYPRCURSOR_SIZE",          "32")
 
 -- Wayland-native where possible; XWayland only as fallback.
 hl.env("MOZ_ENABLE_WAYLAND",       "1")
@@ -224,18 +225,16 @@ hl.on("hyprland.start", function()
     -- workspace pills come up blank. Installing papirus-icon-theme is not enough on
     -- its own; with nothing *named*, XDG lookups fall through to hicolor and even
     -- "image-missing" fails to resolve.
+    hl.exec_cmd("hyprctl setcursor capitaine-cursors 32")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme capitaine-cursors")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-size 32")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
 
-    -- Waybar is retired: Ambxst's bar replaces it, and the sketchybar port it was
-    -- based on now lives on in the Frost Glass preset instead. waybar/ is still in
-    -- the repo but is no longer stowed (see bootstrap.sh's LINUX_ONLY_PKGS), so a
-    -- bare `hypr` session deliberately has no bar at all.
-    if ambxst_session then
-        hl.exec_cmd("ambxst")                               -- bar + dock + notch
-    end
+    -- Start Waybar for the custom frosted glass bar
+    hl.exec_cmd("waybar")
 
-    hl.exec_cmd("hyprpaper")                                -- wallpaper
+    hl.exec_cmd("waypaper --restore")                           -- wallpaper
     hl.exec_cmd("mako")                                     -- notifications
     -- Idle/lock, and only ever one of them.
     --
@@ -254,8 +253,8 @@ hl.on("hyprland.start", function()
     end
     hl.exec_cmd("systemctl --user start hyprpolkitagent")   -- GUI sudo prompts
     hl.exec_cmd("swayosd-server")                           -- volume/brightness OSD
-    hl.exec_cmd("nm-applet --indicator")                    -- tray: wifi
-    hl.exec_cmd("blueman-applet")                           -- tray: bluetooth
+    -- hl.exec_cmd("nm-applet --indicator")                    -- tray: wifi
+    -- hl.exec_cmd("blueman-applet")                           -- tray: bluetooth
 
     -- Clipboard history, the cliphist half of what Raycast's clipboard did on macOS.
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
@@ -385,9 +384,8 @@ if not ambxst_session then
             gaps_in  = 2,
             gaps_out = { top = 5, right = 5, bottom = 5, left = 5 },
 
-            -- `borders` on macOS drew 4px outside the window; Hyprland draws inside,
-            -- so 3px reads at about the same weight.
-            border_size = 3,
+            -- JankyBorders minimal look
+            border_size = 4,
 
             col = {
                 active_border   = { colors = { c.border_active, c.border_accent }, angle = 45 },
