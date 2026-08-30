@@ -9,7 +9,7 @@
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" && "$TERM" != "linux" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
@@ -86,13 +86,17 @@ compinit
 # ─────────────────────────────────────────────
 # Prompt — Powerlevel10k
 # ─────────────────────────────────────────────
-_source_first \
-  /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme \
-  /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme \
-  /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+if [[ "$TERM" == "linux" ]]; then
+	PROMPT='[%n@%m]-(%~) %(#.#.$) '
+else
+	_source_first \
+	  /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme \
+	  /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme \
+	  /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+
+	[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+fi
 
 # ─────────────────────────────────────────────
 # History
@@ -150,11 +154,26 @@ if (( is_mac )); then
 fi
 
 if (( is_linux )); then
+  # ── Starting the desktop ──
+  # There is no display manager on this box; Hyprland is launched by name from the
+  # TTY. These two aliases are the whole session picker.
+  #
+  # hyprland.lua branches on AMBXST_SESSION exactly once, near the top: it decides
+  # whether `ambxst` is started, whether ~/.local/share/ambxst/hyprland.lua is
+  # loaded, and whether this file or Ambxst's compositor.json owns rounding, gaps,
+  # borders, shadow and blur. Bare `hypr` has no bar at all — waybar was retired
+  # when Ambxst took over, so the fallback session is deliberately a clean screen.
+  alias hypr='Hyprland'
+  alias hypr-ambxst='AMBXST_SESSION=1 Hyprland'
+
   # Hyprland/Wayland conveniences. `hypr-reload` is the equivalent of AeroSpace's
   # `alt-shift-semicolon esc` service-mode reload, from a shell.
-  alias hypr-reload='hyprctl reload && pkill -SIGUSR2 waybar && makoctl reload'
+  #
+  # Ambxst reloads itself when its JSON changes, so there is nothing to signal for
+  # the bar the way `pkill -SIGUSR2 waybar` used to do.
+  alias hypr-reload='hyprctl reload && makoctl reload'
   alias hypr-log='tail -f "$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/hyprland.log"'
-  alias waybar-restart='pkill waybar; (waybar &) >/dev/null 2>&1'
+  alias ambxst-restart='pkill -f ambxst; (ambxst &) >/dev/null 2>&1'
   alias gpu='supergfxctl -g'
   alias gpu-int='supergfxctl -m Integrated'
   alias gpu-hyb='supergfxctl -m Hybrid'

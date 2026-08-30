@@ -100,7 +100,10 @@ end
 -- doing the same job on both OSes through two different mechanisms.
 config.text_background_opacity = 0.90
 
-config.window_decorations = 'RESIZE'
+-- macOS keeps 'RESIZE' so the window stays draggable/resizable under AeroSpace, which
+-- does not add its own frame. Hyprland tiles and supplies its own borders, so a
+-- WezTerm frame there is a double border and wasted rows -- 'NONE' on Linux.
+config.window_decorations = is_macos and 'RESIZE' or 'NONE'
 
 -- 'none' is not a color WezTerm can parse — it goes through a CSS colour parser that
 -- knows names, #rrggbb and rgba(), and nothing else. An unparsable value here doesn't
