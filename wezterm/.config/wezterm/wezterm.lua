@@ -46,6 +46,13 @@ config.font = wezterm.font('Hack Nerd Font', {
 config.font_size = 13.0
 config.line_height = 1.08
 
+-- Fix for characters looking "half uncompleted" or clipped on external non-Retina monitors
+if is_macos then
+  config.front_end = "WebGpu"
+  config.freetype_load_target = "Light"
+  config.freetype_render_target = "Normal"
+end
+
 -- ─────────────────────────────────────────────
 -- Dark Frosted Hacker Glass
 -- ─────────────────────────────────────────────
@@ -93,7 +100,10 @@ end
 -- doing the same job on both OSes through two different mechanisms.
 config.text_background_opacity = 0.90
 
-config.window_decorations = 'NONE'
+-- macOS keeps 'RESIZE' so the window stays draggable/resizable under AeroSpace, which
+-- does not add its own frame. Hyprland tiles and supplies its own borders, so a
+-- WezTerm frame there is a double border and wasted rows -- 'NONE' on Linux.
+config.window_decorations = is_macos and 'RESIZE' or 'NONE'
 
 -- 'none' is not a color WezTerm can parse — it goes through a CSS colour parser that
 -- knows names, #rrggbb and rgba(), and nothing else. An unparsable value here doesn't

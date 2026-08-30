@@ -3,6 +3,11 @@
 # packages (Brewfile on macOS, Archfile on Arch), then stow every package that
 # applies to this OS.
 #
+# NOTE: the Brewfile and Archfile are currently not tracked in this repo. Both package
+# phases below are guarded on the manifest existing, so they simply no-op and the run
+# goes straight to stowing. Drop either file back in at the repo root and its phase
+# starts working again with no other change.
+#
 # Idempotent — safe to re-run any time after editing a package, the Brewfile, or the
 # Archfile.
 set -euo pipefail
@@ -34,6 +39,16 @@ echo "detected OS: $os"
 # Package -> OS applicability. Not an associative array on purpose: macOS ships bash 3.2
 # at /bin/bash (no `declare -A` support, and no newer bash is guaranteed to be installed
 # yet on a fresh machine), so this stays plain arrays for portability.
+#
+# This file lives on `main` and is merged into `mac` and `linux` unchanged, so the table
+# below deliberately lists EVERY package across both machines, not just this branch's.
+# Keeping it identical on all three branches is what stops bootstrap.sh conflicting on
+# every merge -- and it stays useful as the one place that documents the full picture.
+#
+# The branch is what actually decides: on `mac` the Linux package directories are simply
+# not checked out, so the `-d` guard in the stow loops skips them. The `$os` check below
+# is then a second line of defence for the case where someone is on the wrong branch for
+# the machine they are sitting at.
 ALL_PKGS=(wezterm yt-dlp zsh git p10k)
 MACOS_ONLY_PKGS=(aerospace sketchybar)      # no Linux/Windows port exists or ever will
 LINUX_ONLY_PKGS=(hypr ambxst rofi mako gtk) # Wayland desktop; meaningless on macOS
@@ -183,20 +198,30 @@ if [[ "$os" == linux ]] && [[ "$do_packages" == yes ]] && [[ -f "$here/Archfile"
   set -e
 fi
 
-for pkg in "${ALL_PKGS[@]}"; do
+# `stow -R` on a package directory that isn't checked out fails outright, so every loop
+# skips what this branch doesn't carry. That is the normal case, not an error: `main`
+# has no OS packages at all, `mac` has no hypr/, `linux` has no aerospace/.
+stow_pkg() {
+  local pkg="$1"
+  if [[ ! -d "$here/$pkg" ]]; then
+    echo "skipping $pkg (not on this branch)"
+    return
+  fi
   echo "stowing $pkg"
   stow -d "$here" -t "$HOME" -R "$pkg"
+}
+
+for pkg in "${ALL_PKGS[@]}"; do
+  stow_pkg "$pkg"
 done
 
 if [[ "$os" == macos ]]; then
   for pkg in "${MACOS_ONLY_PKGS[@]}"; do
-    echo "stowing $pkg"
-    stow -d "$here" -t "$HOME" -R "$pkg"
+    stow_pkg "$pkg"
   done
 else
   for pkg in "${LINUX_ONLY_PKGS[@]}"; do
-    echo "stowing $pkg"
-    stow -d "$here" -t "$HOME" -R "$pkg"
+    stow_pkg "$pkg"
   done
 fi
 

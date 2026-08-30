@@ -5,7 +5,3 @@
 
 # Added by Antigravity CLI installer
 [ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
-
-
-# Added by Antigravity CLI installer
-export PATH="/home/abhishek/.local/bin:$PATH"

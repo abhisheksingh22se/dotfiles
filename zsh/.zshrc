@@ -186,7 +186,3 @@ fi
 
 unset -f _source_first _path_prepend
 unset is_mac is_linux
-
-
-# Added by Antigravity CLI installer
-export PATH="/home/abhishek/.local/bin:$PATH"
