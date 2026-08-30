@@ -133,10 +133,18 @@ Hyprland config, so the muscle memory transfers with no relearning:
 | Workspaces 1–9 | `alt-1..9` / `alt-shift-1..9` | identical |
 | Lettered workspaces | `alt-a..z` | identical (Hyprland *named* workspaces, `name:A`) |
 | Resize | `alt-minus` / `alt-equal` | identical |
-| Split / stack / float | `alt-slash` / `alt-comma` / `alt-shift-f` | `togglesplit` / group toggle / `togglefloating` |
+| Split / stack | `alt-slash` / `alt-comma` | `ALT+slash` / `ALT+comma` (group toggle) |
+| Float toggle | `alt-period` | `ALT+SHIFT+F` — **diverged**, see below |
 | Last workspace | `alt-tab` | identical |
 | Workspace → next monitor | `alt-shift-tab` | identical |
 | Service mode | `alt-shift-semicolon` | identical (a Hyprland submap) |
+
+> **Known divergence — float toggle.** The Mac moved float to `alt-period` and gave
+> `alt-shift-f` back to *move-to-workspace-F*; Linux still floats on `ALT+SHIFT+F` and has no
+> `alt-period` bind. The comment above the layout binds in `hyprland.lua` still cites the old
+> `alt-shift-f` mapping. Pick one and make the other match — this is a real muscle-memory
+> break, not a documentation bug, so it is recorded here rather than silently "fixed" on one
+> side.
 
 `SUPER` is unbound in AeroSpace — macOS handled launching with `CMD` and Raycast. On Linux it
 takes that role: `SUPER+return` terminal, `SUPER+space` launcher, `SUPER+V` clipboard,
