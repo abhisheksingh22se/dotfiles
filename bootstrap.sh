@@ -201,9 +201,15 @@ fi
 # `stow -R` on a package directory that isn't checked out fails outright, so every loop
 # skips what this branch doesn't carry. That is the normal case, not an error: `main`
 # has no OS packages at all, `mac` has no hypr/, `linux` has no aerospace/.
+#
+# Checked with `git ls-files`, not `[[ -d ]]`. A plain directory check is fooled by
+# untracked leftovers -- a Rust `target/` build dir, a Python `venv/` -- that git
+# checkout has no reason to remove because it never tracked them. Those can keep a
+# package's directory non-empty on a branch that dropped the package months ago,
+# which would make this loop try to stow it from stale content.
 stow_pkg() {
   local pkg="$1"
-  if [[ ! -d "$here/$pkg" ]]; then
+  if [[ -z "$(git -C "$here" ls-files "$pkg" 2>/dev/null)" ]]; then
     echo "skipping $pkg (not on this branch)"
     return
   fi
