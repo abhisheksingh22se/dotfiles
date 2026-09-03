@@ -151,22 +151,6 @@ wezterm.on('update-status', function(window, pane)
   local tabs = mux_window:tabs_with_info()
   
   -- Liquid Glass Aesthetic.
-  --
-  -- These were opaque hex (#1E2D23 / #111814). Opaque is the wrong choice for a pill
-  -- that floats on a window already at window_background_opacity = 0.80: the rest of
-  -- the surface shows the blurred desktop through it and the pill doesn't, so the tab
-  -- strip reads as a solid bar glued across the frame instead of part of the glass.
-  --
-  -- rgba() here composites against the *translucent* window background, so the pills
-  -- pick up the same frost as everything else. The alphas are deliberately low — this
-  -- is the same 0.14 mint / 0.06 white vocabulary the waybar capsules use for their
-  -- active and inactive workspace chips, so the terminal's tabs and the bar's
-  -- workspaces look like the same design language.
-  --
-  -- Deliberately NOT behind `if is_linux`. This file is stowed on both platforms
-  -- (bootstrap.sh's ALL_PKGS), and both run window_background_opacity = 0.80 — macOS
-  -- frosting it with macos_window_background_blur, Hyprland with decoration.blur. Same
-  -- problem, same fix, so the tabs should look identical on the Mac and the G14.
   local bg_active = 'rgba(110, 235, 145, 0.14)'   -- mint wash, matches waybar .active
   local fg_active = '#6EEB91'                     -- soft glowing sage (bright, not neon)
 
@@ -335,7 +319,29 @@ config.keys = {
       end),
     },
   },
+
+  {
+    key = 'LeftArrow',
+    mods = 'OPT',
+    action = wezterm.action.SendString '\x1bb',
+  },
+  {
+    key = 'RightArrow',
+    mods = 'OPT',
+    action = wezterm.action.SendString '\x1bf',
+  },
+  {
+    key = 'LeftArrow',
+    mods = super,
+    action = wezterm.action.SendString '\x1bOH',
+  },
+  {
+    key = 'RightArrow',
+    mods = super,
+    action = wezterm.action.SendString '\x1bOF',
+  },
 }
+
 
 -- ─────────────────────────────────────────────
 -- Cursor
