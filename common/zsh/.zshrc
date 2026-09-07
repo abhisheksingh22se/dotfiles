@@ -147,6 +147,8 @@ fi
 # ─────────────────────────────────────────────
 alias ymc="clear && ymc"
 
+alias lg="lazygit"
+
 if (( is_mac )); then
   # Clean, monotone mo status loop (strips colors and applies Dark Grey ANSI).
   # `mo` is macOS-only (Homebrew `mole`), so the alias is too.
