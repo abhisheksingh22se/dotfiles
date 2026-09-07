@@ -1,0 +1,8 @@
+[
+  { "iconName": ":mail:", "appNames": ["Gmail"] },
+  { "iconName": ":photos:", "appNames": ["Google Photos"] },
+  { "iconName": ":google_drive:", "appNames": ["Google Drive"] },
+  { "iconName": ":code:", "appNames": ["Windsurf", "Visual Studio Code", "VSCode"] },
+  { "iconName": ":youtube_music:", "appNames": ["YouTube Music"] },
+  { "iconName": ":youtube:", "appNames": ["YouTube"] }
+]
