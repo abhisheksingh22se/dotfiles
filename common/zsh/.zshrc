@@ -145,6 +145,10 @@ fi
 # ─────────────────────────────────────────────
 # Aliases
 # ─────────────────────────────────────────────
+alias sc="nohup scrcpy -S -w -K --max-fps=120 -b 32M --video-codec=h265 >/dev/null 2>&1 &"
+
+alias scc="scrcpy -S -w -K >/dev/null 2>&1 &"
+
 alias ymc="clear && ymc"
 
 alias lg="lazygit"
