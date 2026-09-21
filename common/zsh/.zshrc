@@ -153,6 +153,10 @@ alias ymc="clear && ymc"
 
 alias lg="lazygit"
 
+# Mounting and Unmounting Linux NAS 
+alias mnt-nas="sshfs abhishek-rog:/mnt/nas/srv ~/arch-nas"
+alias umnt-nas="umount ~/arch-nas"
+
 if (( is_mac )); then
   # Clean, monotone mo status loop (strips colors and applies Dark Grey ANSI).
   # `mo` is macOS-only (Homebrew `mole`), so the alias is too.
