@@ -1,7 +1,7 @@
 onboarding = false
 
 [ui.toast]
-delivery = "herdr"
+delivery = "system"
 
 [theme]
 name = "terminal"
@@ -53,3 +53,6 @@ resize_mode = "prefix+c"
 
 # Reload Config
 reload_config = "prefix+shift+c"
+
+[ui]
+status_indicators = "symbols"

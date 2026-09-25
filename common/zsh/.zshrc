@@ -161,6 +161,7 @@ if (( is_mac )); then
   # Clean, monotone mo status loop (strips colors and applies Dark Grey ANSI).
   # `mo` is macOS-only (Homebrew `mole`), so the alias is too.
   alias mostat='while true; do tput cup 0 0; printf "\e[38;5;244m"; mo status | perl -pe "s/\x1b\[[0-9;]*m//g"; printf "\e[0m"; sleep 2; done'
+  alias tailscale='/Applications/Tailscale.app/Contents/MacOS/Tailscale'
 fi
 
 if (( is_linux )); then
