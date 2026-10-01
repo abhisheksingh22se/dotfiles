@@ -28,8 +28,12 @@ focus_pane_down = "prefix+j"
 focus_pane_up = "prefix+k"
 focus_pane_right = "prefix+l"
 
+# Agents Navigation
+next_agent = "prefix+a"
+previous_agent = "prefix+shift+a"
+
 # Workspaces
-switch_workspace = "prefix+1..9"
+switch_workspace = "prefix+shift+1..9"
 workspace_picker = "prefix+shift+s"
 new_workspace = "prefix+shift+t"
 previous_workspace = "prefix+shift+o"
