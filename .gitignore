@@ -20,5 +20,7 @@ ambxst/.config/ambxst/**/secrets.json
 common/nvim/.config/nvim/lazy-lock.json
 
 # herdr states and logs
-common/herdr/.config/herdr/*.log
-common/herdr/.config/herdr/session.json
+common/herdr/.config/herdr/*
+
+!common/herdr/.config/herdr/config.toml
+!common/herdr/.config/herdr/default_config.toml
