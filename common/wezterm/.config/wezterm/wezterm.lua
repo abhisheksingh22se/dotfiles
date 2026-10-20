@@ -98,7 +98,12 @@ end
 -- *compositor* blurs what shows through. Hyprland's `decoration.blur` block in
 -- hypr/.config/hypr/hyprland.lua is what supplies the frost, so the 0.80 above is
 -- doing the same job on both OSes through two different mechanisms.
-config.text_background_opacity = 0.90
+--
+-- Cells an app paints with its own background (p10k segments, fzf, lazygit, bat,
+-- selections, herdr's chrome) use this alpha instead of the window's. Anything other
+-- than the window opacity draws those cells as darker, more solid blocks over the
+-- glass, so the two stay equal.
+config.text_background_opacity = config.window_background_opacity
 
 -- macOS keeps 'RESIZE' so the window stays draggable/resizable under AeroSpace, which
 -- does not add its own frame. Hyprland tiles and supplies its own borders, so a

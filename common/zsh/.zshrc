@@ -134,12 +134,14 @@ _source_first \
 alias python=python3
 
 # ---- Eza (better ls) -----
-command -v eza >/dev/null 2>&1 && alias ls="eza --icons=always"
-
+command -v eza > /dev/null 2>&1 && {
+  alias ls="eza -l -g --icons=auto --group-directories-first"
+  alias la="eza -la -g --icons=auto --group-directories-first"
+  alias lt="eza -T --level=2 --icons=auto"
+}
 # ---- Zoxide (better cd) ----
 if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh)"
-  alias cd="z"
+  eval "$(zoxide init zsh --cmd cd)"
 fi
 
 # ─────────────────────────────────────────────
